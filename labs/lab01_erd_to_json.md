@@ -1,15 +1,14 @@
 # Lab 1: Intro to NoSQL - From ERD to JSON
 
+## Overview
+This lab introduces the fundamental shift from relational database design to NoSQL document modeling. You'll transform a normalized relational schema (represented by an ERD) into MongoDB documents using the **single document approach** - where all related entities are embedded within one comprehensive document structure.
+
+**Key Learning Goal**: Understand how NoSQL databases favor denormalization and embedding over the normalized, table-based approach of relational databases.
+
 ## Objective
-Convert relational database designs (ERD) into NoSQL document structures by transforming normalized data into embedded MongoDB documents. Practice JSON syntax and document embedding strategies.
+Convert relational database designs (ERD) into NoSQL document structures by transforming normalized data into **a single embedded MongoDB document per order**. All related entities (Customer, Order, OrderItem, Product) will be consolidated into one document, eliminating the need for joins and foreign key relationships.
 
-## Prerequisites
-- Basic understanding of relational databases and ERDs
-- Familiarity with primary keys, foreign keys, and relationships
-- Access to MongoDB shell
-- No prior JSON experience required
-
-## 2-Minute JSON Primer
+## JSON Review
 
 JSON (JavaScript Object Notation) uses key-value pairs to store data:
 
@@ -39,6 +38,8 @@ JSON (JavaScript Object Notation) uses key-value pairs to store data:
 ## ERD Description
 
 ### Entity Relationship Diagram
+
+[erd-diagram](https://cdn-0.plantuml.com/plantuml/png/VP9HQ_em5CNV-odoz-alJDW4NqJ4KYihQjTf7UmnjdSpa2ObkNqGtNTVJ6TmnEunvtTkxhatcMca2fkA1_zA-602I9pcIVvE2awrTcAs99FzT598BjLOGJbrP658A-zv0zCW-AcF6eso0aLE0J7bxfpCoPYyXPleETpyVthi6xfWIcDAAxWX8qjMj0F45MNyrqLMpWvImAqywWTVBjABAbqUUxWRvi-ejcfE4GoPXtcS9-lOo5kasEWRzz2wjmTMXsMfG6ilguKHmwCtcmMo4QYENlzS8kLXTQ6N176KhCELOGz3Rz04eRB3Bhg7NJ41gJHoakQjCrEoR0gyutt5epFk1CDCiGAy4EsTDcPtm6kNwrjqDxMFxwzkkVDs7L64JwdyTNPdDNdSBpsV1mDvQXTbZBsQqm9qBx22eswlnb58WPG9uxbESyz5wngeqeI9NZ03KJOL_mO0)
 
 ```plantuml
 @startuml
@@ -89,7 +90,6 @@ Product ||--o{ OrderItem : "appears in"
 @enduml
 ```
 
-**[ERD Image Placeholder - Render the PlantUML diagram above]**
 
 ### Entities and Attributes:
 
@@ -133,11 +133,6 @@ Transform each order below into the target embedded document structure.
 ### 2. Insert Documents  
 Use `db.lab1.insertOne({...})` for each document.
 
-### 3. Run Validation Queries
-- Count documents: `db.lab1.countDocuments()`
-- Show order IDs and status: `db.lab1.find({}, {_id: 1, status: 1})`
-- Count items per order: `db.lab1.find({}, {_id: 1, itemCount: {$size: "$items"}})`
-
 ## Order Data to Convert
 
 ### Order 1
@@ -177,10 +172,34 @@ Items:
 
 ## Deliverables
 
-Submit:
-1. Four JSON documents (properly formatted)
-2. Four `insertOne()` commands  
-3. Results of validation queries
+Submit **only**:
+- **CSCI112-ST2-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-ERDtoJSON.js** - A JavaScript file containing the four `db.lab1.insertOne()` commands with your converted JSON documents
+
+**File format example**:
+```javascript
+// Lab 1 Solution - ERD to JSON Conversion
+// Students: [Student1 Name], [Student2 Name]
+
+// Order 1
+db.lab1.insertOne({
+  // Your JSON document here
+});
+
+// Order 2
+db.lab1.insertOne({
+  // Your JSON document here
+});
+
+// Order 3
+db.lab1.insertOne({
+  // Your JSON document here
+});
+
+// Order 4
+db.lab1.insertOne({
+  // Your JSON document here
+});
+```
 
 ## Grading
 
