@@ -96,7 +96,7 @@ Replace `username` with your VM username and `<vm_ip_address>` with the IP addre
 Install nano for easier file editing:
 
 ```bash
-sudo dnf install nano -y
+sudo yum install nano -y
 ```
 
 **Basic Nano Usage:**
