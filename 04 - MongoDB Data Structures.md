@@ -19,6 +19,86 @@ This document provides an introduction to MongoDB data structures and basic CRUD
 
 ---
 
+## Lab Data Setup
+
+Before starting the exercises, you'll need to restore the lab databases. Follow these steps to download and restore the required datasets.
+
+### Prerequisites
+
+1. **SSH into your MongoDB server:**
+   ```bash
+   ssh username@192.168.122.61
+   ```
+
+2. **Install wget (if not already installed):**
+   ```bash
+   sudo yum install wget -y
+   ```
+
+### Download Lab Datasets
+
+3. **Download the sample database:**
+   ```bash
+   cd /tmp
+   wget https://admu-contempo.s3.ap-southeast-1.amazonaws.com/data/mongodb_sample.zip
+   ```
+
+4. **Download the labs database:**
+   ```bash
+   wget https://admu-contempo.s3.ap-southeast-1.amazonaws.com/data/mongo_data.zip
+   ```
+
+### Extract and Restore Databases
+
+5. **Extract the archives:**
+   ```bash
+   unzip mongodb_sample.zip
+   unzip mongo_data.zip
+   ```
+
+6. **Restore the sample database:**
+   ```bash
+   mongorestore --db sample mongodb_sample/sample/
+   ```
+
+7. **Restore the labs database:**
+   ```bash
+   mongorestore --db labs mongo_data/
+   ```
+
+### Validate Installation
+
+8. **Connect to MongoDB and verify the databases:**
+   ```bash
+   mongosh
+   ```
+
+   In the MongoDB shell:
+   ```js
+   // Check available databases
+   show dbs
+   
+   // Verify sample database collections
+   use sample
+   show collections
+   db.inspections.countDocuments()
+   
+   // Verify labs database collections
+   use labs
+   show collections
+   db.movies.countDocuments()
+   ```
+
+### Important Notes
+
+- **Database References in Labs:** Throughout the lab exercises, when we refer to collections, they may be located in either the `sample` or `labs` database. Each lab will specify which database to use.
+- **Collection Examples:** 
+  - `sample` database contains: inspections, stories, grades, companies, zips, posts
+  - `labs` database contains: movies and other lab-specific collections
+- The lab instructions will clearly indicate which database and collection to use for each exercise.
+
+---
+
 ## MongoDB Basics
 
 ### MongoDB IDs
