@@ -60,7 +60,55 @@ Document-oriented databases store data as documents, typically in a format simil
 
 ---
 
-### 2. Install MongoDB on Rocky Linux
+### 2. Initial VM Configuration
+
+#### Start and Enable SSH Service
+
+SSH allows you to connect to your VM remotely from your host machine:
+
+```bash
+sudo systemctl start sshd
+sudo systemctl enable sshd
+```
+
+#### Get IP Address Information
+
+To find your VM's IP address for remote connections:
+
+```bash
+ip a
+```
+
+Look for the IP address under your network interface (usually `eth0` or `enp0s3`). You'll need this IP address to connect via SSH.
+
+#### Connect to VM via SSH
+
+From your host machine (Windows/Mac/Linux), you can now connect to your VM:
+
+```bash
+ssh username@<vm_ip_address>
+```
+
+Replace `username` with your VM username and `<vm_ip_address>` with the IP address you found above.
+
+#### Install and Configure Nano Text Editor
+
+Install nano for easier file editing:
+
+```bash
+sudo dnf install nano -y
+```
+
+**Basic Nano Usage:**
+- Open a file: `nano filename`
+- Save file: `Ctrl + O`, then press Enter
+- Exit nano: `Ctrl + X`
+- Cut line: `Ctrl + K`
+- Paste line: `Ctrl + U`
+- Search: `Ctrl + W`
+- Show line numbers: `Ctrl + C` (while in nano)
+
+### 3. Install MongoDB on Rocky Linux
 
 Follow the official MongoDB installation guide for Red Hat-based systems:  
 https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-red-hat/
@@ -84,11 +132,14 @@ sudo firewall-cmd --permanent --add-port=27017/tcp
 sudo firewall-cmd --reload
 ```
 
-Then restart the MongoDB service:
+Then restart and enable the MongoDB service:
 
 ```bash
 sudo systemctl restart mongod
+sudo systemctl enable mongod
 ```
+
+**Note:** The `enable` command ensures MongoDB starts automatically when the system boots.
 
 ---
 
@@ -122,6 +173,15 @@ sudo systemctl restart mongod
 
 ```bash
 sudo systemctl status mongod.service
+```
+
+### Start and Enable MongoDB Service
+
+If MongoDB is not running, start it and enable it to start automatically on boot:
+
+```bash
+sudo systemctl start mongod
+sudo systemctl enable mongod
 ```
 
 ### View Service Logs
