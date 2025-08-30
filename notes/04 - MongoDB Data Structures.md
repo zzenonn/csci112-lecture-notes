@@ -233,6 +233,36 @@ db.movies.find().sort({ "a": 1 }).limit(5).skip(5)
 
 ---
 
+## Sample Data Setup
+
+Before exploring query operators, let's set up a sample movies collection:
+
+```js
+movies.drop()
+movies.insertMany([
+  { "title": "Batman",
+    "category": ["action", "adventure"],
+    "imdb_rating": 7.6,
+    "budget": 35,
+    "revenue": 70,
+    "roten_tomatoes": 7.1 },
+  { "title": "Godzilla",
+    "category": ["action", "adventure", "sci-fi"],
+    "imdb_rating": 6.6,
+    "budget": 70,
+    "revenue": 20,
+    "roten_tomatoes": 8.0 },
+  { "title": "Home Alone",
+    "category": ["family", "comedy"],
+    "imdb_rating": 7.4,
+    "budget": 10,
+    "revenue": 15,
+    "roten_tomatoes": 6.3 }
+])
+```
+
+---
+
 ## Query Operators
 
 ### Comparison Operators
