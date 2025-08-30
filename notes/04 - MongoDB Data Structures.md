@@ -63,7 +63,7 @@ Before starting the exercises, you'll need to restore the lab databases. Follow 
 
 7. **Restore the labs database:**
    ```bash
-   mongorestore --db labs mongo_data/
+   mongorestore --db labs sample/
    ```
 
 ### Validate Installation
