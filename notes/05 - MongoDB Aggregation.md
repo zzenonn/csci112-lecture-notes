@@ -35,6 +35,72 @@ Each stage:
 
 ---
 
+## Sample Data Setup
+
+Before exploring aggregation operations, let's set up a sample movies collection:
+
+```js
+db.movies_small.drop()
+db.movies_small.insertMany([
+  {
+	"title": "Batman2",
+	"category": ["action", "adventure"],
+	"imdb_rating": 7.6,
+	"budget": 35
+  },
+  {
+	"title": "Godzilla",
+	"category": ["action", "adventure", "sci-fi"],
+	"imdb_rating": 6.6,
+	"budget": 42
+  },
+  {
+	"title": "Avengers: Age of Ultron",
+	"category": ["action", "adventure", "sci-fi"],
+	"imdb_rating": 7.4,
+	"budget": 112
+  },
+  {
+	"title": "The Lord of the Rings: The Fellowship of the Ring",
+	"category": ["adventure", "drama", "fantasy"],
+	"imdb_rating": 8.8,
+	"budget": 75
+  },
+  {
+	"title": "Titanic",
+	"category": ["drama", "romance"],
+	"imdb_rating": 7.8,
+	"budget": 241
+  },
+  {
+	"title": "Big Hero 6 ",
+	"category": ["animation", "action", "adventure"],
+	"imdb_rating": 7.8,
+	"budget": 123
+  },
+  {
+	"title": "Maze Runner: The Scorch Trials",
+	"category": ["action", "sci-fi", "thriller"],
+	"imdb_rating": 6.3,
+	"budget": 23
+  },
+  {
+	"title": "Home Alone",
+	"category": ["family", "comedy"],
+	"imdb_rating": 7.4,
+	"budget": 11
+  },
+  {
+	"title": "How the Grinch Stole Christmas",
+	"category": ["family", "comedy", "fantasy"],
+	"imdb_rating": 7.4,
+	"budget": 21
+  }
+])
+```
+
+---
+
 ## Common Aggregation Stages  
 
 ### `$match`  
