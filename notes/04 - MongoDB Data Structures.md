@@ -238,8 +238,8 @@ db.movies.find().sort({ "a": 1 }).limit(5).skip(5)
 Before exploring query operators, let's set up a sample movies collection:
 
 ```js
-movies.drop()
-movies.insertMany([
+db.movies.drop()
+db.movies.insertMany([
   { "title": "Batman",
     "category": ["action", "adventure"],
     "imdb_rating": 7.6,
