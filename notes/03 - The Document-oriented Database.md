@@ -5,6 +5,46 @@
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Objectives](#objectives)
+- [What is a Document-Oriented Database?](#what-is-a-document-oriented-database)
+  - [Advantages](#advantages)
+  - [Disadvantages](#disadvantages)
+  - [When to Use](#when-to-use)
+- [Installation Instructions](#installation-instructions)
+  - [1. Set Up a Virtual Machine](#1-set-up-a-virtual-machine)
+    - [For Windows/Linux Users](#for-windowslinux-users)
+    - [For Mac Users](#for-mac-users)
+  - [2. Initial VM Configuration](#2-initial-vm-configuration)
+    - [Start and Enable SSH Service](#start-and-enable-ssh-service)
+    - [Get IP Address Information](#get-ip-address-information)
+    - [Connect to VM via SSH](#connect-to-vm-via-ssh)
+    - [Install and Configure Nano Text Editor](#install-and-configure-nano-text-editor)
+  - [3. Install MongoDB on Rocky Linux](#3-install-mongodb-on-rocky-linux)
+- [MongoDB Concepts](#mongodb-concepts)
+  - [Databases](#databases)
+  - [Collections](#collections)
+  - [BSON](#bson)
+- [Basic Administrative Tasks](#basic-administrative-tasks)
+  - [Check MongoDB Service Status](#check-mongodb-service-status)
+  - [Start and Enable MongoDB Service](#start-and-enable-mongodb-service)
+  - [View Service Logs](#view-service-logs)
+  - [Connect to MongoDB Server Using `mongosh`](#connect-to-mongodb-server-using-mongosh)
+  - [Switch Databases in Mongo Shell](#switch-databases-in-mongo-shell)
+- [Common Administrative Functions](#common-administrative-functions)
+  - [Create a New User](#create-a-new-user)
+  - [List Databases](#list-databases)
+  - [List Collections in a Database](#list-collections-in-a-database)
+  - [Insert a Document](#insert-a-document)
+  - [Query Documents](#query-documents)
+  - [Update a Document](#update-a-document)
+  - [Delete a Document](#delete-a-document)
+- [Optional: Install MongoDB Compass](#optional-install-mongodb-compass)
+- [Additional Resources](#additional-resources)
+- [Notes](#notes)
+
 ## Overview
 
 This repository contains instructions for setting up a MongoDB development environment for coursework in CSCI 112 / 212. MongoDB is a document-oriented NoSQL database that stores data in flexible, JSON-like documents. This guide will walk you through installing MongoDB on a virtual machine, configuring the server, and performing basic administrative tasks.

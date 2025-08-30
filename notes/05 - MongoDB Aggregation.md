@@ -1,6 +1,41 @@
 # MongoDB Aggregation Pipeline  
 CSCI 112 / 212 - Contemporary Databases  
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Objectives](#objectives)
+- [Aggregation Pipeline Basics](#aggregation-pipeline-basics)
+  - [Syntax](#syntax)
+- [Sample Data Setup](#sample-data-setup)
+- [Common Aggregation Stages](#common-aggregation-stages)
+  - [`$match`](#match)
+  - [`$project`](#project)
+  - [`$group`](#group)
+  - [`$sort`](#sort)
+  - [`$limit`](#limit)
+  - [`$unwind`](#unwind)
+  - [`$out`](#out)
+- [The `$addFields` Stage](#the-addfields-stage)
+  - [Purpose](#purpose)
+  - [Syntax](#syntax-1)
+  - [Example: Add a field for budget in millions](#example-add-a-field-for-budget-in-millions)
+  - [Example: Add a field indicating if the movie is a blockbuster](#example-add-a-field-indicating-if-the-movie-is-a-blockbuster)
+  - [Example: Combine with `$project`](#example-combine-with-project)
+- [Sample Data](#sample-data)
+- [Example Queries](#example-queries)
+  - [Count the number of action movies](#count-the-number-of-action-movies)
+  - [Highest rated expensive movie](#highest-rated-expensive-movie)
+  - [Average IMDB rating per category](#average-imdb-rating-per-category)
+- [Data Cleaning Example](#data-cleaning-example)
+- [Practice Problems](#practice-problems)
+- [Notes on `$out` and Pipeline Limits](#notes-on-out-and-pipeline-limits)
+- [Sample Outputs](#sample-outputs)
+  - [Most Massive Planet](#most-massive-planet)
+  - [Average IMDB Rating per Genre](#average-imdb-rating-per-genre)
+  - [Top 5 Classes by Average Exam Score](#top-5-classes-by-average-exam-score)
+- [Additional Resources](#additional-resources)
+
 ## Overview  
 This document provides a comprehensive overview of MongoDB’s Aggregation Framework, including key pipeline stages, syntax, and practical examples. 
 ---
