@@ -125,7 +125,7 @@ You can extract the timestamp from an ObjectId to determine when a document was 
 ### Insert
 
 ```js
-movies.insert_one({ "title": "Jaws" })
+db.movies.insertOne({ "title": "Jaws" })
 ```
 
 If `_id` is not specified, MongoDB will generate one.
@@ -133,9 +133,9 @@ If `_id` is not specified, MongoDB will generate one.
 Examples:
 
 ```js
-movies.insert_one({ "_id": "Star Wars" }) // Success
-movies.insert_one({ "_id": "Star Wars" }) // DuplicateKeyError
-movies.insert_one({ "_id": ["Star Wars", "Empire"] }) // Invalid _id
+db.movies.insertOne({ "_id": "Star Wars" }) // Success
+db.movies.insertOne({ "_id": "Star Wars" }) // DuplicateKeyError
+db.movies.insertOne({ "_id": ["Star Wars", "Empire"] }) // Invalid _id
 ```
 
 ### Ordered vs. Unordered Inserts
@@ -144,7 +144,7 @@ movies.insert_one({ "_id": ["Star Wars", "Empire"] }) // Invalid _id
 - Unordered: Continues inserting remaining documents
 
 ```js
-movies.insert_many([
+db.movies.insertMany([
   { "_id": "Batman", "year": 1989 },
   { "_id": "Home Alone", "year": 1990 },
   { "_id": "Ghostbusters", "year": 1984 },
@@ -156,7 +156,7 @@ movies.insert_many([
 ### Inserting Arrays
 
 ```js
-movies.insert_many([
+db.movies.insertMany([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "adventure", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] },
@@ -171,15 +171,15 @@ movies.insert_many([
 ### Basic Find
 
 ```js
-movies.find({ "title": "Batman" })
-movies.find({ "category": ["family", "comedy"] })
-movies.find({ "category": "family" })
+db.movies.find({ "title": "Batman" })
+db.movies.find({ "category": ["family", "comedy"] })
+db.movies.find({ "category": "family" })
 ```
 
 ### Dot Notation for Nested Fields
 
 ```js
-movies.find({ "box_office.gross": 760 })
+db.movies.find({ "box_office.gross": 760 })
 ```
 
 ---
@@ -187,15 +187,15 @@ movies.find({ "box_office.gross": 760 })
 ## Deleting Documents
 
 ```js
-movies.delete_one({ "category": "action" }) // Deletes first match
-movies.delete_many({ "category": "action" }) // Deletes all matches
-movies.drop() // Deletes the collection
+db.movies.deleteOne({ "category": "action" }) // Deletes first match
+db.movies.deleteMany({ "category": "action" }) // Deletes all matches
+db.movies.drop() // Deletes the collection
 ```
 
 ### Deleting a Database
 
 ```js
-client.drop_database('database_name')
+db.dropDatabase()
 ```
 
 ---
@@ -205,8 +205,8 @@ client.drop_database('database_name')
 Specify which fields to include or exclude in the result.
 
 ```js
-movies.find({}, { "title": 1 }) // Include only title
-movies.find({ "_id": ObjectId("...") }, { "title": 0 }) // Exclude title
+db.movies.find({}, { "title": 1 }) // Include only title
+db.movies.find({ "_id": ObjectId("...") }, { "title": 0 }) // Exclude title
 ```
 
 ---
@@ -216,7 +216,7 @@ movies.find({ "_id": ObjectId("...") }, { "title": 0 }) // Exclude title
 When using `.find()`, MongoDB returns a cursor.
 
 ```js
-cursor = movies.find()
+cursor = db.movies.find()
 cursor.hasNext()
 cursor.next()
 ```
@@ -224,11 +224,11 @@ cursor.next()
 ### Cursor Methods
 
 ```js
-movies.find().sort("a", 1) // Ascending
-movies.find().sort("a", -1) // Descending
-movies.find().limit(5)
-movies.find().skip(5)
-movies.find().sort("a", 1).limit(5).skip(5)
+db.movies.find().sort({ "a": 1 }) // Ascending
+db.movies.find().sort({ "a": -1 }) // Descending
+db.movies.find().limit(5)
+db.movies.find().skip(5)
+db.movies.find().sort({ "a": 1 }).limit(5).skip(5)
 ```
 
 ---
@@ -251,10 +251,10 @@ movies.find().sort("a", 1).limit(5).skip(5)
 Examples:
 
 ```js
-movies.find({ "imdb_rating": { "$gte": 7 } })
-movies.find({ "category": { "$ne": "family" } })
-movies.find({ "title": { "$in": ["Batman", "Godzilla"] } })
-movies.find({ "title": { "$nin": ["Batman", "Godzilla"] } })
+db.movies.find({ "imdb_rating": { "$gte": 7 } })
+db.movies.find({ "category": { "$ne": "family" } })
+db.movies.find({ "title": { "$in": ["Batman", "Godzilla"] } })
+db.movies.find({ "title": { "$nin": ["Batman", "Godzilla"] } })
 ```
 
 ### Logical Operators
@@ -269,12 +269,12 @@ movies.find({ "title": { "$nin": ["Batman", "Godzilla"] } })
 Examples:
 
 ```js
-movies.find({ "$or": [
+db.movies.find({ "$or": [
   { "category": "sci-fi" },
   { "imdb_rating": { "$gte": 7 } }
 ] })
 
-movies.find({ "$or": [
+db.movies.find({ "$or": [
   { "category": "sci-fi", "imdb_rating": { "$gte": 8 } },
   { "category": "family", "imdb_rating": { "$gte": 7 } }
 ] })
@@ -293,15 +293,15 @@ movies.find({ "$or": [
 Examples:
 
 ```js
-movies.find({ "category": { "$size": 3 } })
-movies.find({ "category": { "$all": ["sci-fi", "action"] } })
-movies.find({ "category": { "$in": ["sci-fi", "action"] } })
+db.movies.find({ "category": { "$size": 3 } })
+db.movies.find({ "category": { "$all": ["sci-fi", "action"] } })
+db.movies.find({ "category": { "$in": ["sci-fi", "action"] } })
 ```
 
 ### $elemMatch
 
 ```js
-movies.find({
+db.movies.find({
   "filming_locations": {
     "$elemMatch": {
       "city": "Florence",
@@ -315,39 +315,39 @@ movies.find({
 
 ## Updating Documents
 
-### replace_one()
+### replaceOne()
 
 Replaces the entire document (except `_id`).
 
 ```js
-movies.replace_one(
+db.movies.replaceOne(
   { "title": "Batman" },
   { "imdb_rating": 7.7 }
 )
 ```
 
-### update_one()
+### updateOne()
 
 Modifies specific fields.
 
 ```js
-movies.update_one(
+db.movies.updateOne(
   { "title": "Batman" },
   { "$set": { "imdb_rating": 7.7 } }
 )
 
-movies.update_one(
+db.movies.updateOne(
   { "title": "Godzilla" },
   { "$set": { "budget": 1 } }
 )
 ```
 
-### update_many()
+### updateMany()
 
 Updates multiple documents.
 
 ```js
-movies.update_many({}, { "$set": { "sequels": 0 } })
+db.movies.updateMany({}, { "$set": { "sequels": 0 } })
 ```
 
 ---
@@ -368,7 +368,7 @@ movies.update_many({}, { "$set": { "sequels": 0 } })
 Example:
 
 ```js
-movies.update_many({}, {
+db.movies.updateMany({}, {
   "$currentDate": {
     "release_date": { "$type": "date" }
   }
@@ -391,7 +391,7 @@ movies.update_many({}, {
 ```
 4. Increment Batman’s IMDB rating by 1:
 ```js
-movies.update_one({ "title": "Batman" }, { "$inc": { "imdb_rating": 1 } })
+db.movies.updateOne({ "title": "Batman" }, { "$inc": { "imdb_rating": 1 } })
 ```
 5. Increment Home Alone’s budget by 5.
 6. Remove Home Alone’s budget.
