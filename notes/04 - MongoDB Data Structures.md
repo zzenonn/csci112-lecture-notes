@@ -2,6 +2,44 @@
 
 CSCI 112 / 212 - Contemporary Databases
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Objectives](#objectives)
+- [Lab Data Setup](#lab-data-setup)
+  - [Prerequisites](#prerequisites)
+  - [Download Lab Datasets](#download-lab-datasets)
+  - [Extract and Restore Databases](#extract-and-restore-databases)
+  - [Validate Installation](#validate-installation)
+  - [Important Notes](#important-notes)
+- [MongoDB Basics](#mongodb-basics)
+  - [MongoDB IDs](#mongodb-ids)
+- [CRUD Operations](#crud-operations)
+  - [Insert](#insert)
+  - [Ordered vs. Unordered Inserts](#ordered-vs-unordered-inserts)
+  - [Inserting Arrays](#inserting-arrays)
+- [Finding Documents](#finding-documents)
+  - [Basic Find](#basic-find)
+  - [Dot Notation for Nested Fields](#dot-notation-for-nested-fields)
+- [Deleting Documents](#deleting-documents)
+  - [Deleting a Database](#deleting-a-database)
+- [Projections](#projections)
+- [Cursors](#cursors)
+  - [Cursor Methods](#cursor-methods)
+- [Sample Data Setup](#sample-data-setup)
+- [Query Operators](#query-operators)
+  - [Comparison Operators](#comparison-operators)
+  - [Logical Operators](#logical-operators)
+- [Array Query Operators](#array-query-operators)
+  - [$elemMatch](#elemmatch)
+- [Updating Documents](#updating-documents)
+  - [replaceOne()](#replaceone)
+  - [updateOne()](#updateone)
+  - [updateMany()](#updatemany)
+- [Other Update Operators](#other-update-operators)
+- [Practice Exercises](#practice-exercises)
+- [Summary](#summary)
+
 ## Overview
 
 This document provides an introduction to MongoDB data structures and basic CRUD operations. It also covers how MongoDB handles document identifiers, querying, projections, cursors, and update operations.
