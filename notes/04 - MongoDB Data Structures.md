@@ -330,6 +330,26 @@ db.movies.find({ "category": { "$in": ["sci-fi", "action"] } })
 
 ### $elemMatch
 
+First, let's set up data with nested documents in arrays:
+
+```js
+db.movies.drop()
+db.movies.insertMany([{
+	"title": "Raiders of the Lost Ark",
+	"filming_locations": [
+  	{ "city": "Los Angeles", "state": "CA", "country": "USA" },
+  	{ "city": "Rome", "state": "Lazio", "country": "Italy" },
+  	{ "city": "Florence", "state": "SC", "country": "USA" }
+	] },
+	{"title": "Hannibal",
+	"filming_locations": [
+  	{ "city": "Washington, D.C.", "state": "WA", "country": "USA" },
+  	{ "city": "Florence", "state": "Lazio", "country": "Italy" },
+  	{ "city": "Richmond", "state": "VA", "country": "USA" }
+	] }
+])
+```
+
 ```js
 db.movies.find({
   "filming_locations": {
