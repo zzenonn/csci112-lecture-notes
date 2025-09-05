@@ -38,6 +38,30 @@ CSCI 112 / 212 - Contemporary Databases
 
 ## Overview  
 This document provides a comprehensive overview of MongoDB’s Aggregation Framework, including key pipeline stages, syntax, and practical examples. 
+## Data Pipelines and Data Lineage
+
+Before diving into MongoDB's aggregation pipeline, it's important to understand the broader concept of data pipelines and data lineage. A data pipeline is a series of data processing steps where data flows from one stage to another, with each stage transforming the data in some way.
+
+![Data Pipeline Example](../images/data-pipeline-example.svg)
+
+The diagram above illustrates a typical data pipeline flow:
+- **Raw Input Data**: Starting with unprocessed data (e.g., customerId, region, items)
+- **Transformations**: A series of processing steps that clean, reshape, and analyze the data:
+  - Filter Data (remove irrelevant rows)
+  - Flatten Items (split arrays into rows) 
+  - Calculate Line Amount (qty × price)
+  - Aggregate by Customer (sum totals)
+  - Reshape Output (rename fields, select columns)
+- **Final Dataset**: The processed result ready for consumption (e.g., customerId, customerRegion, orderTotal)
+
+**Data lineage** refers to the ability to track data from its origin through all the transformations it undergoes. This is crucial for:
+- Understanding how data flows through your system
+- Debugging data quality issues
+- Ensuring compliance and auditability
+- Optimizing performance
+
+MongoDB's aggregation pipeline is a specific implementation of this data pipeline concept, where documents flow through a series of stages, each performing specific transformations on the data.
+
 ---
 
 ## Objectives  

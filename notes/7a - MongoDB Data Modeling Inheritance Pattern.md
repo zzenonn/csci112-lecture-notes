@@ -1,7 +1,6 @@
-```markdown
 # MongoDB Data Modeling: Inheritance Pattern
 
-**Course:** CSCI 122 / 212 - Contemporary Databases  
+**Course:** CSCI 112 / 212 - Contemporary Databases  
 **Topic:** MongoDB Inheritance Pattern
 
 ---
@@ -346,4 +345,3 @@ Expected output:
 - [MongoDB Schema Design Best Practices](https://www.mongodb.com/docs/manual/core/data-model-design/)
 
 For further questions or assistance, please reach out during office hours or post in the course discussion forum.
-```
