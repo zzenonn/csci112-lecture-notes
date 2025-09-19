@@ -275,6 +275,63 @@ var cleanup_audiobook_entries_in_book_pipeline = [
 db.books.aggregate(cleanup_audiobook_entries_in_book_pipeline);
 ```
 
+#### Update Book Product Types
+
+```javascript
+var cleanup_book_entries_in_book_pipeline = [
+  {
+    $match: {
+      $and: [
+        { product_type: "Unspecified" }, 
+        { pages: { $gte: 0 } },
+        { catalogues: { $exists: true } }
+      ]
+    }
+  },
+  {
+    $set: { product_type: "book" }
+  },
+  {
+    $merge: {
+      into: "books",
+      on: "_id",
+      whenMatched: "replace",
+      whenNotMatched: "discard"
+    }
+  }
+];
+
+db.books.aggregate(cleanup_book_entries_in_book_pipeline);
+```
+
+#### Update Ebook Product Types
+
+```javascript
+var cleanup_ebook_entries_in_book_pipeline = [
+  {
+    $match: {
+      $and: [
+        { product_type: "Unspecified" }, 
+        { eformats: { $exists: true } }
+      ]
+    }
+  },
+  {
+    $set: { product_type: "ebook" }
+  },
+  {
+    $merge: {
+      into: "books",
+      on: "_id",
+      whenMatched: "replace",
+      whenNotMatched: "discard"
+    }
+  }
+];
+
+db.books.aggregate(cleanup_ebook_entries_in_book_pipeline);
+```
+
 ---
 
 ## Step 4: Verify the Updates
