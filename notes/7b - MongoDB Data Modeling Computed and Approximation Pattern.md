@@ -133,26 +133,3 @@ This reduces the number of writes to the book document by approximately 90%, whi
 Both the Computed and Approximation Patterns are valuable tools for optimizing MongoDB schema design. Choosing between them depends on your application's performance needs and tolerance for approximation.
 
 ---
-
-## Lab Assignment
-
-In the upcoming lab, you will implement both the Computed and Approximation Patterns in the bookstore application. You will:
-
-- Use the Computed Pattern to maintain accurate average ratings for books with a small number of reviews.
-- Apply the Approximation Pattern for books with a large number of reviews to reduce write overhead.
-- Create a roll-up summary of product types using an aggregation pipeline.
-
-This lab will help you understand how to balance accuracy and performance in real-world MongoDB applications.
-
-Be sure to review this README and the lecture notes before starting the lab.
-
----
-
-## Additional Resources
-
-- [MongoDB Schema Design Patterns](https://www.mongodb.com/blog/post/building-with-patterns-a-summary)
-- [MongoDB Aggregation Framework](https://docs.mongodb.com/manual/aggregation/)
-- [MongoDB University Courses](https://university.mongodb.com/)
-
----
-
