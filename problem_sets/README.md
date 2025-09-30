@@ -8,12 +8,12 @@
 
 ### Table of Contents
 
-#### Problem Set 7: MongoDB Data Modeling Patterns
-- [Problem Set 7: Fitness Equipment Rental](2025-2026/Problem_Set_7_Fitness_Equipment_Rental.md)
-- [Problem Set 7: Hospital Patient Management](2025-2026/Problem_Set_7_Hospital_Patient_Management.md)
-- [Problem Set 7: Social Media Analytics](2025-2026/Problem_Set_7_Social_Media_Analytics.md) 
-- [Problem Set 7: University Course Management](2025-2026/Problem_Set_7_University_Course_Management.md)
-- [Problem Set 7: Vehicle Management System](2025-2026/Problem_Set_7_Vehicle_Management_System.md)
+#### MongoDB Data Modeling Patterns
+- [Problem Set: Fitness Equipment Rental](2025-2026/Problem_Set_Fitness_Equipment_Rental.md)
+- [Problem Set: Hospital Patient Management](2025-2026/Problem_Set_Hospital_Patient_Management.md)
+- [Problem Set: Social Media Analytics](2025-2026/Problem_Set_Social_Media_Analytics.md) 
+- [Problem Set: University Course Management](2025-2026/Problem_Set_University_Course_Management.md)
+- [Problem Set: Vehicle Management System](2025-2026/Problem_Set_Vehicle_Management_System.md)
 
 ---
 

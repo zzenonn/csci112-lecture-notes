@@ -1,4 +1,4 @@
-# Problem Set 7: University Course Management System
+# Problem Set: University Course Management System
 
 **Course:** CSCI 112 - Contemporary Databases  
 **Topic:** MongoDB Data Modeling  

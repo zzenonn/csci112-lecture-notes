@@ -1,4 +1,4 @@
-# Problem Set 8: Fitness Equipment Rental System
+# Problem Set: Fitness Equipment Rental System
 
 **Course:** CSCI 112 - Contemporary Databases  
 **Topic:** MongoDB Data Modeling  

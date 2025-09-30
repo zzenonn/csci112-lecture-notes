@@ -1,4 +1,4 @@
-# Problem Set 7: Hospital Patient Management System
+# Problem Set: Hospital Patient Management System
 
 **Course:** CSCI 112 - Contemporary Databases  
 **Topic:** MongoDB Data Modeling  

@@ -1,4 +1,4 @@
-# Problem Set 7: Vehicle Management System
+# Problem Set: Vehicle Management System
 
 **Course:** CSCI 112 / 212 - Contemporary Databases  
 **Topic:** MongoDB Data Modeling Challenge  

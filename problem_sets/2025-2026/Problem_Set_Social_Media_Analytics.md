@@ -1,4 +1,4 @@
-# Problem Set 7: Social Media Analytics Platform
+# Problem Set: Social Media Analytics Platform
 
 **CSCI 112 - Contemporary Databases**  
 **Topic:** MongoDB Data Modeling - Performance Optimization Patterns  
