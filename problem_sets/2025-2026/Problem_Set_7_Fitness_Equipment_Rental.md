@@ -121,15 +121,11 @@ The company has provided the following JSON data from their current systems:
 
 ---
 
-## Task 1: Data Model Design
+## Tasks
 
-Design a MongoDB data model that consolidates this diverse fitness equipment data into a single collection while preserving all the unique characteristics of each equipment type. Your solution should handle the inconsistent field naming and structure across the different equipment categories.
+1. Design a MongoDB data model that consolidates this diverse fitness equipment data into a single collection while preserving all the unique characteristics of each equipment type. Your solution should handle the inconsistent field naming and structure across the different equipment categories.
 
----
-
-## Task 2: Data Pipeline Implementation
-
-Create MongoDB aggregation pipelines that transform the existing JSON data from the three separate collections (cardio_equipment, strength_equipment, yoga_equipment) into your unified equipment_inventory collection following your proposed data model structure.
+2. Create MongoDB aggregation pipelines that transform the existing JSON data from the three separate collections (cardio_equipment, strength_equipment, yoga_equipment) into your unified equipment_inventory collection following your proposed data model structure.
 
 ---
 
