@@ -145,7 +145,7 @@ def get_specific_order(table, customer_id, order_id):
 ## Deliverables
 
 Submit **only**:
-- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-DynamoDB.py**
+- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-DynamoDB.zip** The zip file must only contain the requirements.txt and an optional readme. **DO NOT include dependencies in the submission**
 
 **File format example**:
 ```python
