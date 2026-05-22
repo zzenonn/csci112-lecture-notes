@@ -8,7 +8,7 @@ layout: cover
 Databases in the Real World
 
 ::author-info::
-Miguel Zenon Nicanor Lerias Saavedra
+Miguel Zenon Nicanor Lerias Saavedra, PhD
 
 ::subject-info::
 CSCI 112 / 212

@@ -9,7 +9,7 @@ codeCopy: true
 The Document-Oriented Database
 
 ::author-info::
-Miguel Zenon Nicanor Lerias Saavedra
+Miguel Zenon Nicanor Lerias Saavedra, PhD
 
 ::subject-info::
 CSCI 112 / 212
