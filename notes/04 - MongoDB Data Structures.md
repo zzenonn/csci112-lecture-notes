@@ -256,7 +256,7 @@ client = MongoClient("mongodb://<vm_ip_address>:27017/")
 
 # Select database and collection
 db = client["movies"]
-collection = db["movies"]
+movies_collection = db["movies"]
 ```
 
 > Make sure your VM has `bindIp: 0.0.0.0` in `/etc/mongod.conf` and port 27017 open in the firewall (covered in Module 03).
@@ -273,16 +273,17 @@ From here on, all examples use PyMongo. The query operator syntax (`$gt`, `$or`,
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://<vm_ip_address>:27017/")
-collection = client["movies"]["movies"]
+db = client["movies"]
+movies_collection = db["movies"]
 
 # Insert a single document
-result = collection.insert_one({ "title": "Jaws" })
+result = movies_collection.insert_one({ "title": "Jaws" })
 print(result.inserted_id)  # auto-generated _id
 ```
 
 ```python
 # Insert multiple documents
-collection.insert_many([
+movies_collection.insert_many([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -291,8 +292,8 @@ collection.insert_many([
 
 ```python
 # Duplicate _id raises DuplicateKeyError
-collection.insert_one({ "_id": "Star Wars" })  # Success
-collection.insert_one({ "_id": "Star Wars" })  # DuplicateKeyError
+movies_collection.insert_one({ "_id": "Star Wars" })  # Success
+movies_collection.insert_one({ "_id": "Star Wars" })  # DuplicateKeyError
 ```
 
 For unordered inserts (continue past duplicates):
@@ -309,7 +310,7 @@ docs = [
 ]
 
 try:
-    collection.insert_many(docs, ordered=False)
+    movies_collection.insert_many(docs, ordered=False)
 except BulkWriteError as e:
     print(e.details)
 ```
@@ -322,10 +323,10 @@ Before continuing, insert the full sample dataset that the remaining examples de
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://<vm_ip_address>:27017/")
-collection = client["movies"]["movies"]
+movies_collection = client["movies"]["movies"]
 
-collection.drop()
-collection.insert_many([
+movies_collection.drop()
+movies_collection.insert_many([
   {
     "title": "Batman",
     "category": ["action", "adventure"],
@@ -354,18 +355,18 @@ collection.insert_many([
 
 ```python
 # Returns all documents
-for doc in collection.find():
+for doc in movies_collection.find():
     print(doc)
 
 # Filter by field value
-doc = collection.find_one({ "title": "Batman" })
+doc = movies_collection.find_one({ "title": "Batman" })
 
 # Filter by array element (any match)
-for doc in collection.find({ "category": "family" }):
+for doc in movies_collection.find({ "category": "family" }):
     print(doc)
 
 # Filter by exact array
-for doc in collection.find({ "category": ["family", "comedy"] }):
+for doc in movies_collection.find({ "category": ["family", "comedy"] }):
     print(doc)
 ```
 
@@ -373,7 +374,7 @@ for doc in collection.find({ "category": ["family", "comedy"] }):
 
 ```python
 # Query nested field using dot notation string
-for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -381,14 +382,14 @@ for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
 
 ```python
 # Delete first matching document
-collection.delete_one({ "category": "action" })
+movies_collection.delete_one({ "category": "action" })
 
 # Delete all matching documents
-result = collection.delete_many({ "category": "action" })
+result = movies_collection.delete_many({ "category": "action" })
 print(result.deleted_count)
 
 # Drop the entire collection
-collection.drop()
+movies_collection.drop()
 
 # Drop the entire database
 client.drop_database("movies")
@@ -402,15 +403,15 @@ Specify which fields to include (`1`) or exclude (`0`) in the result.
 
 ```python
 # Include only title (plus _id by default)
-for doc in collection.find({}, { "title": 1 }):
+for doc in movies_collection.find({}, { "title": 1 }):
     print(doc)
 
 # Exclude title
-for doc in collection.find({}, { "title": 0 }):
+for doc in movies_collection.find({}, { "title": 0 }):
     print(doc)
 
 # Exclude _id explicitly
-for doc in collection.find({}, { "title": 1, "_id": 0 }):
+for doc in movies_collection.find({}, { "title": 1, "_id": 0 }):
     print(doc)
 ```
 
@@ -426,15 +427,15 @@ for doc in collection.find({}, { "title": 1, "_id": 0 }):
 
 ```python
 # Sort: 1 = ascending, -1 = descending
-for doc in collection.find().sort("imdb_rating", -1):
+for doc in movies_collection.find().sort("imdb_rating", -1):
     print(doc)
 
 # Limit and skip
-for doc in collection.find().skip(5).limit(5):
+for doc in movies_collection.find().skip(5).limit(5):
     print(doc)
 
 # Chained
-for doc in collection.find().sort("title", 1).skip(5).limit(5):
+for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
     print(doc)
 ```
 
@@ -458,16 +459,16 @@ for doc in collection.find().sort("title", 1).skip(5).limit(5):
 Query operator syntax is identical to mongosh — just Python dicts:
 
 ```python
-for doc in collection.find({ "imdb_rating": { "$gte": 7 } }):
+for doc in movies_collection.find({ "imdb_rating": { "$gte": 7 } }):
     print(doc)
 
-for doc in collection.find({ "category": { "$ne": "family" } }):
+for doc in movies_collection.find({ "category": { "$ne": "family" } }):
     print(doc)
 
-for doc in collection.find({ "title": { "$in": ["Batman", "Godzilla"] } }):
+for doc in movies_collection.find({ "title": { "$in": ["Batman", "Godzilla"] } }):
     print(doc)
 
-for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -481,13 +482,13 @@ for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
 | $nor     | Match none |
 
 ```python
-for doc in collection.find({ "$or": [
+for doc in movies_collection.find({ "$or": [
     { "category": "sci-fi" },
     { "imdb_rating": { "$gte": 7 } }
 ] }):
     print(doc)
 
-for doc in collection.find({ "$or": [
+for doc in movies_collection.find({ "$or": [
     { "category": "sci-fi", "imdb_rating": { "$gte": 8 } },
     { "category": "family", "imdb_rating": { "$gte": 7 } }
 ] }):
@@ -505,10 +506,10 @@ for doc in collection.find({ "$or": [
 | $elemMatch  | Match at least one element with all conditions |
 
 ```python
-for doc in collection.find({ "category": { "$size": 3 } }):
+for doc in movies_collection.find({ "category": { "$size": 3 } }):
     print(doc)
 
-for doc in collection.find({ "category": { "$all": ["sci-fi", "action"] } }):
+for doc in movies_collection.find({ "category": { "$all": ["sci-fi", "action"] } }):
     print(doc)
 ```
 
@@ -517,8 +518,8 @@ for doc in collection.find({ "category": { "$all": ["sci-fi", "action"] } }):
 `$elemMatch` matches documents where at least one array element satisfies all conditions simultaneously. First set up the data:
 
 ```python
-collection.drop()
-collection.insert_many([
+movies_collection.drop()
+movies_collection.insert_many([
   {
     "title": "Raiders of the Lost Ark",
     "filming_locations": [
@@ -538,7 +539,7 @@ collection.insert_many([
 ])
 
 # Finds only Hannibal — Florence in Italy, not South Carolina
-for doc in collection.find({
+for doc in movies_collection.find({
     "filming_locations": {
         "$elemMatch": { "city": "Florence", "country": "Italy" }
     }
@@ -555,7 +556,7 @@ for doc in collection.find({
 Replaces the entire document (except `_id`). Use with caution — all fields not in the replacement are removed.
 
 ```python
-collection.replace_one(
+movies_collection.replace_one(
     { "title": "Batman" },
     { "imdb_rating": 7.7 }   # Batman now only has _id and imdb_rating
 )
@@ -566,12 +567,12 @@ collection.replace_one(
 Modifies specific fields without replacing the whole document.
 
 ```python
-collection.update_one(
+movies_collection.update_one(
     { "title": "Batman" },
     { "$set": { "imdb_rating": 7.7 } }
 )
 
-collection.update_one(
+movies_collection.update_one(
     { "title": "Godzilla" },
     { "$set": { "box_office.budget": 1 } }
 )
@@ -582,7 +583,7 @@ collection.update_one(
 Updates all matching documents.
 
 ```python
-collection.update_many({}, { "$set": { "sequels": 0 } })
+movies_collection.update_many({}, { "$set": { "sequels": 0 } })
 ```
 
 ---
@@ -602,13 +603,13 @@ collection.update_many({}, { "$set": { "sequels": 0 } })
 
 ```python
 # Increment Home Alone's budget by 5
-collection.update_one(
+movies_collection.update_one(
     { "title": "Home Alone" },
     { "$inc": { "box_office.budget": 5 } }
 )
 
 # Set current date on all documents
-collection.update_many({}, {
+movies_collection.update_many({}, {
     "$currentDate": { "release_date": { "$type": "date" } }
 })
 ```
@@ -623,7 +624,7 @@ Write Python scripts using PyMongo for each exercise. Connect to your VM's Mongo
 2. Find either sci-fi or comedy movies.
 3. Find all movies that made a profit (gross > budget):
 ```python
-for doc in collection.find({ "$expr": { "$gt": ["$box_office.gross", "$box_office.budget"] } }):
+for doc in movies_collection.find({ "$expr": { "$gt": ["$box_office.gross", "$box_office.budget"] } }):
     print(doc)
 ```
 4. Increment Batman's IMDB rating by 1.
@@ -689,7 +690,7 @@ Work through this checklist:
 
 ### Q: `DuplicateKeyError` when inserting
 
-You're inserting a document with an `_id` that already exists in the collection. Either omit `_id` (MongoDB will generate one), use a different value, or drop the collection first with `collection.drop()`.
+You're inserting a document with an `_id` that already exists in the collection. Either omit `_id` (MongoDB will generate one), use a different value, or drop the collection first with `movies_collection.drop()`.
 
 ---
 

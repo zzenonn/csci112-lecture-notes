@@ -170,7 +170,7 @@ client = MongoClient("mongodb://<vm_ip_address>:27017/")
 
 # Select database and collection
 db = client["movies"]
-collection = db["movies"]
+movies_collection = db["movies"]
 ```
 
 <div style="margin-top:1rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.75rem 1rem; border-radius:0 6px 6px 0; font-size:0.9rem;">
@@ -185,14 +185,15 @@ collection = db["movies"]
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://<vm_ip_address>:27017/")
-collection = client["movies"]["movies"]
+db = client["movies"]
+movies_collection = db["movies"]
 
 # Insert a single document (_id auto-generated)
-result = collection.insert_one({ "title": "Jaws" })
+result = movies_collection.insert_one({ "title": "Jaws" })
 print(result.inserted_id)
 
 # Insert multiple documents
-collection.insert_many([
+movies_collection.insert_many([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -215,18 +216,18 @@ Before running the following examples, insert the sample `movies` collection fro
 
 ```python
 # All documents
-for doc in collection.find():
+for doc in movies_collection.find():
     print(doc)
 
 # Filter by field value
-doc = collection.find_one({ "title": "Batman" })
+doc = movies_collection.find_one({ "title": "Batman" })
 
 # Filter by array element (any match)
-for doc in collection.find({ "category": "family" }):
+for doc in movies_collection.find({ "category": "family" }):
     print(doc)
 
 # Nested field using dot notation
-for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -236,14 +237,14 @@ for doc in collection.find({ "box_office.gross": { "$gt": 50 } }):
 
 ```python
 # Delete first matching document
-collection.delete_one({ "category": "action" })
+movies_collection.delete_one({ "category": "action" })
 
 # Delete all matching documents
-result = collection.delete_many({ "category": "action" })
+result = movies_collection.delete_many({ "category": "action" })
 print(result.deleted_count)
 
 # Drop the entire collection
-collection.drop()
+movies_collection.drop()
 
 # Drop the entire database
 client.drop_database("movies")
@@ -255,19 +256,19 @@ client.drop_database("movies")
 
 ```python
 # replace_one — replaces entire document (keeps _id)
-collection.replace_one(
+movies_collection.replace_one(
     { "title": "Batman" },
     { "imdb_rating": 7.7 }
 )
 
 # update_one — modifies specific fields only
-collection.update_one(
+movies_collection.update_one(
     { "title": "Batman" },
     { "$set": { "imdb_rating": 7.7 } }
 )
 
 # update_many — update all matching documents
-collection.update_many({}, { "$set": { "sequels": 0 } })
+movies_collection.update_many({}, { "$set": { "sequels": 0 } })
 ```
 
 ---
@@ -296,13 +297,13 @@ collection.update_many({}, { "$set": { "sequels": 0 } })
 
 ```python
 # Increment Home Alone's budget by 5
-collection.update_one(
+movies_collection.update_one(
     { "title": "Home Alone" },
     { "$inc": { "box_office.budget": 5 } }
 )
 
 # Set current date on all docs
-collection.update_many({}, {
+movies_collection.update_many({}, {
     "$currentDate": {
         "release_date": { "$type": "date" }
     }
@@ -326,15 +327,15 @@ Control which fields are returned — `1` to include, `0` to exclude:
 
 ```python
 # Include only title (plus _id by default)
-for doc in collection.find({}, { "title": 1 }):
+for doc in movies_collection.find({}, { "title": 1 }):
     print(doc)
 
 # Exclude _id explicitly
-for doc in collection.find({}, { "title": 1, "_id": 0 }):
+for doc in movies_collection.find({}, { "title": 1, "_id": 0 }):
     print(doc)
 
 # Exclude a field
-for doc in collection.find({}, { "rotten_tomatoes": 0 }):
+for doc in movies_collection.find({}, { "rotten_tomatoes": 0 }):
     print(doc)
 ```
 
@@ -350,15 +351,15 @@ for doc in collection.find({}, { "rotten_tomatoes": 0 }):
 
 ```python
 # Sort: 1 = ascending, -1 = descending
-for doc in collection.find().sort("imdb_rating", -1):
+for doc in movies_collection.find().sort("imdb_rating", -1):
     print(doc)
 
 # Limit and skip
-for doc in collection.find().skip(0).limit(5):
+for doc in movies_collection.find().skip(5).limit(5):
     print(doc)
 
 # Chained
-for doc in collection.find().sort("title", 1).skip(5).limit(5):
+for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
     print(doc)
 ```
 
@@ -374,9 +375,9 @@ for doc in collection.find().sort("title", 1).skip(5).limit(5):
 | `$in` / `$nin` | In array / not in array |
 
 ```python
-collection.find({ "imdb_rating": { "$gte": 7 } })
-collection.find({ "box_office.gross": { "$gt": 50 } })
-collection.find({ "title": { "$in": ["Batman", "Godzilla"] } })
+movies_collection.find({ "imdb_rating": { "$gte": 7 } })
+movies_collection.find({ "box_office.gross": { "$gt": 50 } })
+movies_collection.find({ "title": { "$in": ["Batman", "Godzilla"] } })
 ```
 
 ---
@@ -391,7 +392,7 @@ collection.find({ "title": { "$in": ["Batman", "Godzilla"] } })
 | `$nor` | Match none |
 
 ```python
-for doc in collection.find({ "$or": [
+for doc in movies_collection.find({ "$or": [
     { "category": "sci-fi" },
     { "imdb_rating": { "$gte": 7 } }
 ] }):
@@ -409,11 +410,11 @@ for doc in collection.find({ "$or": [
 | `$elemMatch` | At least one element matches all conditions |
 
 ```python
-collection.find({ "category": { "$size": 3 } })
-collection.find({ "category": { "$all": ["sci-fi", "action"] } })
+movies_collection.find({ "category": { "$size": 3 } })
+movies_collection.find({ "category": { "$all": ["sci-fi", "action"] } })
 
 # $elemMatch on nested documents
-collection.find({
+movies_collection.find({
     "filming_locations": {
         "$elemMatch": { "city": "Florence", "country": "Italy" }
     }
