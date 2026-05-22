@@ -71,3 +71,45 @@ Practical guide for deploying MongoDB clusters on Amazon Web Services, covering 
 - **[7c - Reference Pattern](7c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)**
 - **[7d - Schema Versioning](7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning%20copy.md)**
 - **[7e - Single Collection](7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)**
+- **[7f - Subset Pattern](7f%20-%20MongoDB%20Data%20Modeling%20Subset%20Pattern.md)**
+
+### [08 - Introduction to DynamoDB](08%20-%20Introduction%20to%20DynamoDB.md)
+**Key-Value and Document Databases with Amazon DynamoDB**
+
+Introduction to Amazon DynamoDB as a serverless, fully managed NoSQL database. Covers core concepts including tables, items, primary keys, secondary indexes, and billing modes. Includes hands-on setup with Python and boto3.
+
+**Key Topics:**
+- Serverless and fully managed database concepts
+- Key-value and document store data models
+- Partition keys, sort keys, and composite primary keys
+- Local Secondary Indexes (LSI)
+- Environment setup with boto3 (AWS SDK for Python)
+- Basic CRUD operations and query patterns
+- DynamoDB vs. MongoDB comparison
+
+### [09 - DynamoDB Data Modeling](09%20-%20DynamoDB%20Data%20Modeling.md)
+**DynamoDB Data Modeling -- Single-Table Design and Multi-Attribute Keys**
+
+Advanced DynamoDB data modeling techniques for storing multiple entity types in a single table. Covers Global Secondary Indexes, the inverted index pattern, and the multi-attribute keys feature that eliminates synthetic key concatenation.
+
+**Key Topics:**
+- Single-table design pattern and motivation
+- Comparison with MongoDB Single Collection Pattern
+- Global Secondary Indexes (GSI) and the inverted index pattern
+- Multi-attribute keys for GSI partition and sort keys
+- Walkthrough: users, orders, and line items in one table
+- Access-pattern-driven data modeling principles
+
+### [10 - DynamoDB Design Patterns](10%20-%20DynamoDB%20Design%20Patterns.md)
+**DynamoDB Design Patterns -- From Single-Table to Aggregate-Oriented Design**
+
+Revisits the Module 09 single-table design and shows how to improve it using aggregate-oriented design principles. Covers natural keys, item collections, identifying relationships, aggregate boundary decisions, and when to use multiple tables.
+
+**Key Topics:**
+- Problems with generic "everything-table" designs
+- Natural keys over generic identifiers
+- Item collections and identifying relationships
+- Aggregate-oriented design with access correlation analysis
+- When to use multiple tables vs. item collections
+- Short-circuit denormalization, sparse GSIs, hierarchical sort keys
+- Side-by-side comparison of Module 09 vs. improved design

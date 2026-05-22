@@ -1,0 +1,13 @@
+packages:
+  - "01-databases-real-world"
+  - "02-nosql-intro"
+  - "03-document-oriented-db"
+  - "04-mongodb-data-structures"
+  - "05-mongodb-aggregation"
+  - "06-mongodb-sharding-replication"
+  - "07a-modeling-inheritance-computed-approximation"
+  - "07b-modeling-reference-versioning-single-collection"
+  - "07c-modeling-subset"
+  - "08-dynamodb-intro"
+  - "09-dynamodb-data-modeling"
+  - "10-dynamodb-design-patterns"
