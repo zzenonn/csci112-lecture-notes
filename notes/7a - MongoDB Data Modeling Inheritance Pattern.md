@@ -408,3 +408,136 @@ for doc in books.find({"product_type": "audiobook"}):
 - [PyMongo Documentation](https://pymongo.readthedocs.io/)
 
 For further questions or assistance, please reach out during office hours or post in the course discussion forum.
+
+---
+
+## Full Example
+
+The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `<vm_ip_address>`. It drops `books`, inserts the three messy sample documents, runs the aggregation-based migration (Pass 1 normalizes fields; Pass 2 sets `product_type` per subtype), and prints the final, normalized documents.
+
+```python
+from pymongo import MongoClient
+
+client = MongoClient("mongodb://<vm_ip_address>:27017/")
+db     = client["bookstore"]
+books  = db["books"]
+
+# Reset for a clean run
+books.drop()
+
+# 1. Insert the three messy sample documents
+books.insert_many([
+    {
+        "_id": 1,
+        "product_id": 34538756,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "details": "MongoDB explained by MongoDB champions",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
+        "publisher": "O'Reilly",
+        "language": "English",
+        "pages": 514,
+        "catalogues": {"isbn10": "1491954469", "isbn13": "978-1491954461"}
+    },
+    {
+        "_id": 2,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "desc": "MongoDB explained by MongoDB champions",
+        "authors": "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
+        "publisher": "O'Reilly",
+        "language": "English",
+        "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
+        "isbn10": "1491954469"
+    },
+    {
+        "_id": 3,
+        "product_id": 54538756,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "desc": "The complete book of MongoDB by its employees",
+        "author": "Eoin Brazil",
+        "narrator": "Eoin Brazil",
+        "publisher": "O'Reilly",
+        "language": "English",
+        "length_minutes": 1200
+    }
+])
+
+# 2. Pass 1 — normalize field names with $project + $ifNull, write back via $merge
+apply_inheritance_pattern_pipeline = [
+    {
+        "$project": {
+            "_id": "$_id",
+            "product_id":   {"$ifNull": ["$product_id", 0]},
+            "product_type": {"$ifNull": ["$product_type", "Unspecified"]},
+            "title": "$title",
+            "description": {
+                "$ifNull": ["$desc", "$description", "$details", "Unspecified"]
+            },
+            "authors": {
+                "$cond": {
+                    "if":   {"$isArray": "$authors"},
+                    "then": "$authors",
+                    "else": {
+                        "$cond": {
+                            "if":   {"$isArray": ["$author"]},
+                            "then": "$author",
+                            "else": [{"$ifNull": ["$author", "Unspecified"]}]
+                        }
+                    }
+                }
+            },
+            "publisher": "$publisher",
+            "language":  "$language",
+            "pages":      "$pages",
+            "catalogues": "$catalogues",
+            "eformats":   "$eformats",
+            "isbn10":     "$isbn10",
+            "isbn13":     "$isbn13",
+            "narrator":       "$narrator",
+            "length_minutes": "$length_minutes"
+        }
+    },
+    {
+        "$merge": {
+            "into": "books",
+            "on": "_id",
+            "whenMatched": "replace",
+            "whenNotMatched": "discard"
+        }
+    }
+]
+books.aggregate(apply_inheritance_pattern_pipeline)
+
+# 3. Pass 2 — classify each document by a field unique to its subtype
+cleanup_pipelines = {
+    "audiobook": [
+        {"$match": {"$and": [{"product_type": "Unspecified"},
+                              {"length_minutes": {"$gte": 0}}]}},
+        {"$set": {"product_type": "audiobook"}},
+        {"$merge": {"into": "books", "on": "_id",
+                     "whenMatched": "replace", "whenNotMatched": "discard"}}
+    ],
+    "book": [
+        {"$match": {"$and": [{"product_type": "Unspecified"},
+                              {"pages": {"$gte": 0}},
+                              {"catalogues": {"$exists": True}}]}},
+        {"$set": {"product_type": "book"}},
+        {"$merge": {"into": "books", "on": "_id",
+                     "whenMatched": "replace", "whenNotMatched": "discard"}}
+    ],
+    "ebook": [
+        {"$match": {"$and": [{"product_type": "Unspecified"},
+                              {"eformats": {"$exists": True}}]}},
+        {"$set": {"product_type": "ebook"}},
+        {"$merge": {"into": "books", "on": "_id",
+                     "whenMatched": "replace", "whenNotMatched": "discard"}}
+    ],
+}
+for pipeline in cleanup_pipelines.values():
+    books.aggregate(pipeline)
+
+# 4. Verify
+for doc in books.find():
+    print(doc)
+```
+
+After running, every document carries a normalized `description`, an `authors` array, and a `product_type` discriminator (`book`, `ebook`, or `audiobook`) — ready to use with the Computed and Approximation patterns in [notes/7b](7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md).

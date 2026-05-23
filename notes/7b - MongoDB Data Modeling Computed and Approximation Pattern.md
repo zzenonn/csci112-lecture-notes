@@ -303,3 +303,128 @@ Both the Computed and Approximation Patterns are valuable tools for optimizing M
 - [PyMongo Documentation](https://pymongo.readthedocs.io/)
 - [MongoDB `$inc` Operator](https://www.mongodb.com/docs/manual/reference/operator/update/inc/)
 - [MongoDB Aggregation `$merge`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/merge/)
+
+---
+
+## Full Example
+
+The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `<vm_ip_address>`. It assumes the `books` collection already exists from [notes/7a](7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). It defines `add_review` (Computed) and `add_review_approx` (Approximation), runs both end-to-end demos, then runs a roll-up into `book_summary`.
+
+```python
+import random
+import time
+from pymongo import MongoClient, ReturnDocument
+
+client = MongoClient("mongodb://<vm_ip_address>:27017/")
+db     = client["bookstore"]
+books  = db["books"]
+
+# ---------------------------------------------------------------------------
+# Computed Pattern: pre-compute on every write
+# ---------------------------------------------------------------------------
+def add_review(book_id, star_rating):
+    """Add a single review and update the cached average rating exactly."""
+    updated = books.find_one_and_update(
+        {"_id": book_id},
+        {"$inc": {
+            "rating.review_count": 1,
+            "rating.total_stars":  star_rating
+        }},
+        return_document=ReturnDocument.AFTER,
+    )
+    new_avg = updated["rating"]["total_stars"] / updated["rating"]["review_count"]
+    books.update_one(
+        {"_id": book_id},
+        {"$set": {"rating.average_rating": new_avg}}
+    )
+
+# Computed demo: insert a fresh book, send three reviews, read the cached average
+books.delete_one({"_id": 1})
+books.insert_one({
+    "_id": 1,
+    "title": "MongoDB: The Definitive Guide",
+    "rating": {"review_count": 0, "total_stars": 0.0, "average_rating": 0.0}
+})
+
+add_review(1, 5.0)
+add_review(1, 4.0)
+add_review(1, 4.0)
+
+print("Computed result:", books.find_one({"_id": 1}, {"rating": 1}))
+# → {'_id': 1, 'rating': {'review_count': 3, 'total_stars': 13.0, 'average_rating': 4.333...}}
+
+# ---------------------------------------------------------------------------
+# Approximation Pattern: only ~10% of reviews actually write to MongoDB
+# ---------------------------------------------------------------------------
+def add_review_approx(book_id, star_rating):
+    """Add a review using the Approximation Pattern.
+
+    Only ~10% of reviews actually trigger a database update; when they do,
+    the update is extrapolated as if 10 reviews were added.
+    """
+    if random.randint(1, 10) == 10:
+        updated = books.find_one_and_update(
+            {"_id": book_id},
+            {"$inc": {
+                "rating.review_count": 10,
+                "rating.total_stars":  star_rating * 10
+            }},
+            return_document=ReturnDocument.AFTER,
+        )
+        new_avg = updated["rating"]["total_stars"] / updated["rating"]["review_count"]
+        books.update_one(
+            {"_id": book_id},
+            {"$set": {"rating.average_rating": new_avg}}
+        )
+
+# Approximation demo: insert a hot book, send 1000 reviews, inspect the document
+books.delete_one({"_id": 2})
+books.insert_one({
+    "_id": 2,
+    "title": "Hot Book",
+    "rating": {"review_count": 0, "total_stars": 0.0, "average_rating": 0.0}
+})
+
+for _ in range(1000):
+    add_review_approx(2, 5.0)
+
+print("Approximation result:", books.find_one({"_id": 2}, {"rating": 1}))
+# → review_count ≈ 1000, total_stars ≈ 5000, average_rating ≈ 5.0
+
+# ---------------------------------------------------------------------------
+# Side-by-side timing: 1000 incoming reviews each
+# ---------------------------------------------------------------------------
+start = time.perf_counter()
+for _ in range(1000):
+    add_review(1, 5.0)
+print(f"Computed:      {time.perf_counter() - start:.2f}s, 1000 writes")
+
+start = time.perf_counter()
+for _ in range(1000):
+    add_review_approx(2, 5.0)
+print(f"Approximation: {time.perf_counter() - start:.2f}s, ~100 writes")
+
+# ---------------------------------------------------------------------------
+# Roll-up: aggregate the books collection into a daily summary
+# ---------------------------------------------------------------------------
+roll_up_pipeline = [
+    {"$group": {
+        "_id":   "$product_type",
+        "count": {"$sum": 1},
+        "average_number_of_authors": {"$avg": {"$size": "$authors"}}
+    }},
+    {"$merge": {
+        "into": "book_summary",
+        "on": "_id",
+        "whenMatched": "replace",
+        "whenNotMatched": "insert"
+    }}
+]
+books.aggregate(roll_up_pipeline)
+
+print("Roll-up summary:")
+for doc in db["book_summary"].find():
+    print(" ", doc)
+```
+
+Running this end-to-end exercises every pattern in the note: Computed produces an exact average from atomic `$inc` updates, Approximation skips ~90% of the writes for a high-volume book, the side-by-side timing makes the write-savings concrete, and the roll-up demonstrates the periodic-aggregation variant of the Computed Pattern.
