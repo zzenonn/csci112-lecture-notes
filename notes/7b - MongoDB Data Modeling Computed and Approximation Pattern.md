@@ -1,6 +1,6 @@
 # MongoDB Data Modeling: Computed and Approximation Patterns
 
-CSCI 122 / 212 - Contemporary Databases  
+CSCI 112 / 212 - Contemporary Databases  
 Department of Computer Science
 
 ---
