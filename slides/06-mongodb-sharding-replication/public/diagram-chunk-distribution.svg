@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260">
+  <!-- Top: Single Collection box -->
+  <rect x="160" y="4" width="200" height="36" rx="4" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="260" y="27" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#1e40af">Single Collection</text>
+
+  <!-- 4 arrows down from collection to key range labels -->
+  <line x1="130" y1="40" x2="90" y2="76" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="195" y1="40" x2="196" y2="76" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="260" y1="40" x2="300" y2="76" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="340" y1="40" x2="408" y2="76" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L8,4 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Key range labels -->
+  <text x="68" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">Key Range</text>
+  <text x="68" y="104" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">0 – 25</text>
+
+  <text x="175" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">Key Range</text>
+  <text x="175" y="104" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">26 – 50</text>
+
+  <text x="280" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">Key Range</text>
+  <text x="280" y="104" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">51 – 75</text>
+
+  <text x="390" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">Key Range</text>
+  <text x="390" y="104" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">76 – 100</text>
+
+  <!-- Chunk boxes row -->
+  <!-- Shard 1 chunks -->
+  <rect x="20" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="42" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+  <rect x="68" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="90" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+
+  <!-- Shard 2 chunks -->
+  <rect x="130" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="152" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+  <rect x="178" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="200" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+
+  <!-- Shard 1 extra chunks -->
+  <rect x="240" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="262" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+  <rect x="288" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="310" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+
+  <!-- Shard 2 extra chunks -->
+  <rect x="350" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="372" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+  <rect x="398" y="112" width="44" height="22" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="420" y="128" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#1e40af">CHUNK</text>
+
+  <!-- Arrows down to shards -->
+  <line x1="68" y1="134" x2="100" y2="172" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="200" y1="134" x2="215" y2="172" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="268" y1="134" x2="320" y2="172" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="420" y1="134" x2="435" y2="172" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Shard 1 box -->
+  <rect x="20" y="170" width="185" height="50" rx="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="112" y="191" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#1e40af">Shard 1</text>
+  <text x="112" y="208" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3730a3">Replica Set</text>
+
+  <!-- Shard 2 box -->
+  <rect x="300" y="170" width="185" height="50" rx="5" fill="#fde8d0" stroke="#f97316" stroke-width="1.5"/>
+  <text x="392" y="191" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#9a3412">Shard 2</text>
+  <text x="392" y="208" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#9a3412">Replica Set</text>
+</svg>

@@ -36,7 +36,7 @@ layout: section
 
 # Why Scale?
 
-<div style="display:flex; gap:2rem; margin-top:1rem;">
+<div style="display:flex; gap:2rem; margin-top:0.75rem;">
   <div style="flex:1; border:1.5px solid #cbd5e1; border-radius:6px; padding:1rem;">
     <div style="font-weight:700; margin-bottom:0.5rem;">Vertical Scaling</div>
     <div style="font-size:0.9rem; line-height:1.7; color:#444;">
@@ -51,6 +51,10 @@ layout: section
       <strong>MongoDB's approach:</strong> <em>sharding</em> — distribute data across a cluster.
     </div>
   </div>
+</div>
+
+<div style="display:flex; justify-content:center; margin-top:1.5rem;">
+  <img src="/diagram-horizontal-scaling.svg" style="height:110px;" />
 </div>
 
 ---
@@ -86,36 +90,22 @@ layout: section
   <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.4rem 0.8rem;">Shard 1</div>
   <div style="color:#aaa;">/</div>
   <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.4rem 0.8rem;">Shard 2</div>
-  <div style="color:#aaa;">/</div>
-  <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.4rem 0.8rem;">Shard 3</div>
 </div>
 
 ---
 
 # Shard Keys and Chunks
 
-<div style="display:flex; gap:2rem; margin-top:0.5rem;">
-<div style="flex:1; font-size:0.88rem; line-height:1.5;">
+<div style="display:flex; gap:2rem; margin-top:0.5rem; align-items:flex-start;">
+<div style="flex:1; font-size:0.88rem; line-height:1.6;">
 
-**Shard Key** — field used to partition data across shards.
-Must be indexed; cannot be changed after sharding.
+**Shard Key** — field used to partition data across shards. Must be indexed; cannot be changed after sharding.
 
-**Chunk** — a contiguous range of shard key values on one shard. Default: 64 MB. MongoDB splits and migrates chunks automatically to balance load.
+**Chunk** — a contiguous range of shard key values assigned to one shard. MongoDB splits and migrates chunks automatically to balance load.
 
 </div>
-<div style="flex:1; font-size:0.85rem;">
-
-<div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:6px; padding:0.75rem 1rem; margin-top:0.5rem;">
-  <div style="font-weight:700; margin-bottom:0.4rem;">Example — shard key: <code>name</code></div>
-  <div style="line-height:1.8;">
-    Chunk A: <code>A → M</code> → Shard 1<br>
-    Chunk B: <code>M → Z</code> → Shard 2<br><br>
-    If "M" entries grow, MongoDB splits:<br>
-    <code>M-A → M-P</code> → Shard 1<br>
-    <code>M-P → M-Z</code> → Shard 2
-  </div>
-</div>
-
+<div style="flex:1.2; display:flex; justify-content:center; align-items:center;">
+  <img src="/diagram-chunk-distribution.svg" style="width:100%; max-width:440px;" />
 </div>
 </div>
 
@@ -160,9 +150,8 @@ Documents are assigned to shards based on **ranges of shard key values**.
 <div style="flex:1;">
 
 ```
-Shard 1: key 0 – 99
-Shard 2: key 100 – 199
-Shard 3: key 200 – 299
+Shard 1: key 0 – 149
+Shard 2: key 150 – 299
 ```
 
 **Advantages**
@@ -185,21 +174,15 @@ Shard 3: key 200 – 299
 
 The shard key value is **hashed** before assignment — distributes data evenly regardless of key distribution.
 
-<div style="display:flex; gap:2rem; margin-top:1rem;">
-<div style="flex:1;">
-
-```
-hash("Alice") → 0x3f2a → Shard 2
-hash("Bob")   → 0x9c11 → Shard 1
-hash("Carol") → 0x4e80 → Shard 3
-```
+<div style="display:flex; gap:2rem; margin-top:0.75rem; align-items:flex-start;">
+<div style="flex:1; display:flex; justify-content:center;">
+  <img src="/diagram-hash-function.svg" style="width:100%; max-width:420px;" />
+</div>
+<div style="flex:1; font-size:0.9rem;">
 
 **Advantages**
 - Even distribution across shards
 - No hotspots on sequential inserts
-
-</div>
-<div style="flex:1;">
 
 **Disadvantages**
 - Range queries must broadcast to all shards
@@ -264,25 +247,8 @@ A **replica set** is a group of MongoDB instances that maintain the same dataset
 
 Each shard in a production cluster is itself a **replica set** — combining the benefits of both.
 
-<div style="display:flex; gap:1rem; margin-top:1rem; font-size:0.82rem; text-align:center;">
-  <div style="flex:1; border:1.5px solid #cbd5e1; border-radius:8px; padding:0.75rem;">
-    <div style="font-weight:700; margin-bottom:0.4rem;">Config Servers<br><span style="font-weight:400; color:#888;">(replica set)</span></div>
-  </div>
-  <div style="flex:1; border:1.5px solid #16a34a; border-radius:8px; padding:0.75rem; background:#f0fdf4;">
-    <div style="font-weight:700; margin-bottom:0.4rem;">mongos<br><span style="font-weight:400; color:#888;">(router)</span></div>
-  </div>
-  <div style="flex:1; border:1.5px solid #f97316; border-radius:8px; padding:0.75rem; background:#fff7ed;">
-    <div style="font-weight:700; margin-bottom:0.3rem;">Shard 1</div>
-    <div style="color:#666;">Primary<br>Secondary<br>Secondary</div>
-  </div>
-  <div style="flex:1; border:1.5px solid #f97316; border-radius:8px; padding:0.75rem; background:#fff7ed;">
-    <div style="font-weight:700; margin-bottom:0.3rem;">Shard 2</div>
-    <div style="color:#666;">Primary<br>Secondary<br>Secondary</div>
-  </div>
-  <div style="flex:1; border:1.5px solid #f97316; border-radius:8px; padding:0.75rem; background:#fff7ed;">
-    <div style="font-weight:700; margin-bottom:0.3rem;">Shard 3</div>
-    <div style="color:#666;">Primary<br>Secondary<br>Secondary</div>
-  </div>
+<div style="display:flex; justify-content:center; margin-top:1rem;">
+  <img src="/diagram-cluster-topology.svg" style="width:90%; max-width:500px;" />
 </div>
 
 ---
@@ -335,22 +301,22 @@ Sharding introduces significant complexity — only adopt it when you need to.
 layout: section
 ---
 
-# Lab — Deploying on AWS
+# Lab — Deploying on Cloud VMs
 
 ---
 
-# Cluster on AWS EC2
+# Cluster on Cloud VMs
 
-A production sharded cluster requires at minimum **10 instances**:
+This lab deploys a minimal sharded + replicated cluster using **7 instances**:
 
 <div style="display:flex; gap:1.5rem; margin-top:1rem; font-size:0.88rem;">
   <div style="flex:1; border:1.5px solid #cbd5e1; border-radius:6px; padding:0.75rem;">
-    <div style="font-weight:700;">3 × Config Servers</div>
+    <div style="font-weight:700;">2 × Config Servers</div>
     <div style="color:#666; margin-top:0.3rem;">Replica set (CSRS)<br>Port 27019</div>
   </div>
   <div style="flex:1; border:1.5px solid #f97316; border-radius:6px; padding:0.75rem; background:#fff7ed;">
-    <div style="font-weight:700;">6 × Shard Servers</div>
-    <div style="color:#666; margin-top:0.3rem;">3 shards × 2 replicas<br>Port 27018</div>
+    <div style="font-weight:700;">4 × Shard Servers</div>
+    <div style="color:#666; margin-top:0.3rem;">2 shards × 2 nodes each<br>Port 27018</div>
   </div>
   <div style="flex:1; border:1.5px solid #16a34a; border-radius:6px; padding:0.75rem; background:#f0fdf4;">
     <div style="font-weight:700;">1 × mongos</div>
@@ -359,7 +325,7 @@ A production sharded cluster requires at minimum **10 instances**:
 </div>
 
 <div style="margin-top:1.25rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.75rem 1rem; border-radius:0 6px 6px 0; font-size:0.9rem;">
-  Deploy shards across separate <strong>Availability Zones</strong> to maximize fault tolerance. Full step-by-step instructions in <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/06b%20-%20MongoDB%20Sharding%20and%20Replication%20on%20AWS.md">notes/06b — MongoDB Sharding and Replication on AWS</a>.
+  Use the smallest available instance type (e.g. <code>e2-micro</code> on GCP, <code>t2.micro</code> on AWS). Stop instances when not in use. Full step-by-step instructions in <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/labs/lab05_mongodb_sharding.md">Lab 5</a>.
 </div>
 
 ---
@@ -377,12 +343,12 @@ mongod --port 27018 --shardsvr --replSet <replicasetname> \
 
 # 3. Start mongos, pointing at config servers
 mongos --port 27017 --bind_ip 0.0.0.0 \
-       --configdb csrs/<ip>:27019,<ip>:27019 \
+       --configdb csrs/<ip1>:27019,<ip2>:27019 \
        --fork --logpath /var/log/mongodb/mongod.log
 ```
 
 <div style="margin-top:0.75rem; font-size:0.85rem; color:#666;">
-  Full runbook including replica set initiation and shard registration: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/06b%20-%20MongoDB%20Sharding%20and%20Replication%20on%20AWS.md">notes/06b</a>
+  Full runbook including replica set initiation and shard registration: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/labs/lab05_mongodb_sharding.md">Lab 5</a>
 </div>
 
 ---
@@ -396,7 +362,7 @@ Once mongos is running and shards are registered, enable sharding:
 use sample
 db.grades.createIndex({ "class_id": "hashed" }, { background: true })
 sh.enableSharding("sample")
-sh.shardCollection("sample.grades", { "class_id": "hashed" }, false, { numInitialChunks: 3 })
+sh.shardCollection("sample.grades", { "class_id": "hashed" }, false, { numInitialChunks: 2 })
 
 // Verify distribution
 db.grades.getShardDistribution()

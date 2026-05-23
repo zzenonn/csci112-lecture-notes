@@ -1,5 +1,5 @@
 # MongoDB: Sharding and Replication  
-CSCI 122 / 212 - Contemporary Databases  
+CSCI 112 / 212 - Contemporary Databases  
 
 ## Overview  
 This document provides an overview of MongoDB's sharding and replication features. These are essential concepts for building scalable and highly available database systems. By the end of this module, students should be able to:  
@@ -54,7 +54,11 @@ Two important attributes of an effective shard key:
 - **High Cardinality**: The key should have many possible values to allow for even distribution.  
 - **Well-Distributed Frequency**: The values should be evenly distributed to avoid hotspots.
 
-A poor shard key can lead to uneven chunk distribution, performance bottlenecks, and scalability issues.
+A poor shard key can lead to uneven chunk distribution, performance bottlenecks, and scalability issues. Common pitfalls include:
+
+- **Low cardinality** (e.g., a boolean field) — limits the number of chunks that can ever exist.
+- **Monotonically increasing values** (e.g., timestamps, ObjectId) — all new inserts go to the same shard, creating a write hotspot.
+- **Uneven distribution** — one or a few values represent the majority of documents, causing a "hot shard".
 
 ---
 
@@ -121,6 +125,8 @@ Each shard in a sharded cluster is typically a replica set. This architecture co
 - Easier to set up and manage.  
 - No need for data partitioning.  
 - Ideal when the dataset fits within a single server's capacity.
+
+> **Practical guidance:** Start with a replica set. Add sharding only when your data volume or throughput exceeds what a single replica set can handle.
 
 ---
 
