@@ -33,20 +33,6 @@ layout: section
 
 ---
 
-# The Golden Rule
-
-<div style="display:flex; justify-content:center; margin:2rem 0;">
-  <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:8px; padding:1.5rem 2rem; font-size:1.1rem; font-weight:700; color:#166534; text-align:center; max-width:600px;">
-    Data that is accessed together<br>should be stored together.
-  </div>
-</div>
-
-Relational design normalizes data to eliminate redundancy and uses JOINs to reassemble it at query time.
-
-MongoDB stores **pre-assembled** documents — the shape of your data should mirror how your application reads it.
-
----
-
 # NoSQL vs Relational Design
 
 <div style="overflow-x:auto; margin-top:1rem;">
@@ -87,6 +73,20 @@ MongoDB stores **pre-assembled** documents — the shape of your data should mir
   </tbody>
 </table>
 </div>
+
+---
+
+# The Golden Rule
+
+<div style="display:flex; justify-content:center; margin:2rem 0;">
+  <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:8px; padding:1.5rem 2rem; font-size:1.1rem; font-weight:700; color:#166534; text-align:center; max-width:600px;">
+    Data that is accessed together<br>should be stored together.
+  </div>
+</div>
+
+Relational design normalizes data to eliminate redundancy and uses JOINs to reassemble it at query time.
+
+MongoDB stores **pre-assembled** documents — the shape of your data should mirror how your application reads it.
 
 ---
 
@@ -160,7 +160,7 @@ Use it when documents:
     <div style="font-weight:700; margin-bottom:0.4rem; color:#166534;">Use it</div>
     <div style="font-size:0.87rem; line-height:1.7; color:#444;">
       All book types display on the same product listing page.<br>
-      A single <code>db.books.find()</code> returns everything.
+      A single <code>books.find()</code> returns everything.
     </div>
   </div>
   <div style="border:1.5px solid #dc2626; border-radius:6px; padding:1rem; background:#fef2f2;">
@@ -175,179 +175,221 @@ Use it when documents:
 
 # Example: Bookstore Data Structure
 
-Three book types with shared and unique fields — all in one `books` collection:
+<div style="display:grid; grid-template-columns:1fr 1.2fr; gap:1.2rem; margin-top:0.8rem;">
+  <div>
+    <div style="font-weight:700; color:#0c4a6e; margin-bottom:0.4rem;">Shared fields (all types)</div>
+    <div style="background:#f0f9ff; border:1.5px solid #00b0f0; border-radius:6px; padding:0.7rem 0.9rem; font-size:0.85rem; line-height:1.8;">
+      <code>_id</code>, <code>product_id</code>, <code>title</code><br>
+      <code>authors</code>, <code>publisher</code>, <code>language</code>, <code>description</code>
+    </div>
+    <div style="margin-top:0.8rem; font-weight:700; color:#0c4a6e; margin-bottom:0.4rem;">Discriminator</div>
+    <div style="background:#f0fdf4; border:1.5px solid #16a34a; border-radius:6px; padding:0.7rem 0.9rem; font-size:0.85rem;">
+      <code>product_type</code>: <code>"book"</code> | <code>"ebook"</code> | <code>"audiobook"</code>
+    </div>
+  </div>
+  <div>
+    <div style="font-weight:700; color:#9a3412; margin-bottom:0.4rem;">Type-specific fields</div>
+    <div style="display:grid; grid-template-columns:1fr; gap:0.5rem;">
+      <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:6px; padding:0.55rem 0.8rem; font-size:0.82rem;">
+        <strong>book</strong> → <code>pages</code>, <code>stock_level</code>, <code>catalogues</code>
+      </div>
+      <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:6px; padding:0.55rem 0.8rem; font-size:0.82rem;">
+        <strong>ebook</strong> → <code>eformats</code>, <code>download_url</code>
+      </div>
+      <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:6px; padding:0.55rem 0.8rem; font-size:0.82rem;">
+        <strong>audiobook</strong> → <code>narrator</code>, <code>length_minutes</code>, <code>time_by_chapter</code>
+      </div>
+    </div>
+  </div>
+</div>
 
-```javascript
-// product_type discriminator distinguishes each shape
-{ _id: 1, product_type: "book",      title: "...", pages: 514, catalogues: { isbn10: "..." } }
-{ _id: 2, product_type: "ebook",     title: "...", eformats: { epub: {...}, pdf: {...} } }
-{ _id: 3, product_type: "audiobook", title: "...", narrator: "...", length_minutes: 1200 }
-```
-
-<div style="margin-top:1rem; font-size:0.88rem; color:#555;">
-Shared fields: <code>title</code>, <code>authors</code>, <code>publisher</code>, <code>language</code>, <code>description</code><br>
-Unique fields differentiate the three subtypes.
+<div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
+  Full document examples: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/7a — Inheritance Pattern</a>
 </div>
 
 ---
 
-# Step 1 — Insert Sample Documents
+# PyMongo Setup
 
-```javascript
-db.books.insertMany([
-  {
-    _id: 1, product_id: 34538756,
-    title: "MongoDB: The Definitive Guide",
-    details: "MongoDB explained by MongoDB champions",
-    authors: ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
-    publisher: "O'Reilly", language: "English",
-    pages: 514, catalogues: { isbn10: "1491954469", isbn13: "978-1491954461" }
-  },
-  {
-    _id: 2,
-    title: "MongoDB: The Definitive Guide",
-    desc: "MongoDB explained by MongoDB champions",
-    authors: "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
-    publisher: "O'Reilly", language: "English",
-    eformats: { epub: { pages: 774 }, pdf: { pages: 502 } },
-    isbn10: "1491954469"
-  },
-  {
-    _id: 3, product_id: 54538756,
-    title: "MongoDB: The Definitive Guide",
-    desc: "The complete book of MongoDB by its employees",
-    author: "Eoin Brazil", narrator: "Eoin Brazil",
-    publisher: "O'Reilly", language: "English",
-    length_minutes: 1200
-  }
+All examples in this deck use PyMongo from your laptop, connecting to `mongod` on a VM:
+
+```python
+from pymongo import MongoClient, ReturnDocument
+
+client = MongoClient("mongodb://<vm_ip_address>:27017/")
+db     = client["bookstore"]
+books  = db["books"]
+```
+
+The `books` variable is the **collection handle** — every example below calls methods on it
+(`books.insert_many`, `books.aggregate`, `books.update_one`, …).
+
+<div style="margin-top:1rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.6rem 1rem; font-size:0.85rem;">
+  Need to set up <code>.venv</code> and install <code>pymongo</code>? See <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md">notes/04 — MongoDB Data Structures</a>.
+</div>
+
+---
+
+# Migrating Existing Data
+
+In practice, you rarely start with clean data. You inherit a collection where documents drifted apart over time:
+
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem; margin-top:1rem; font-size:0.78rem;">
+  <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.6rem;">
+    <div style="font-weight:700; margin-bottom:0.3rem;">Doc 1</div>
+    <code>details: "..."</code><br>
+    <code>authors: [...]</code><br>
+    <code>pages: 514</code>
+  </div>
+  <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.6rem;">
+    <div style="font-weight:700; margin-bottom:0.3rem;">Doc 2</div>
+    <code>desc: "..."</code><br>
+    <code>authors: "a, b, c"</code><br>
+    <code>eformats: {...}</code>
+  </div>
+  <div style="border:1.5px solid #cbd5e1; border-radius:6px; padding:0.6rem;">
+    <div style="font-weight:700; margin-bottom:0.3rem;">Doc 3</div>
+    <code>desc: "..."</code><br>
+    <code>author: "x"</code><br>
+    <code>length_minutes: 1200</code>
+  </div>
+</div>
+
+<div style="margin-top:1rem; font-size:0.9rem;">
+  <strong>Goal:</strong> reshape every document so it conforms to the Inheritance Pattern — consistent field names, all carrying a <code>product_type</code> discriminator.
+</div>
+
+<div style="margin-top:0.8rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
+  Full sample documents and <code>insert_many</code> snippet: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-1-insert-sample-documents">notes/7a — Step 1</a>
+</div>
+
+---
+
+# Two Migration Strategies
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+  <div style="border:1.5px solid #00b0f0; border-radius:6px; padding:1rem; background:#f0f9ff;">
+    <div style="font-weight:700; margin-bottom:0.4rem;">Option A — <code>replace_one</code></div>
+    <div style="font-size:0.85rem; line-height:1.6; color:#444;">
+      Manually rewrite each document with the corrected shape.<br><br>
+      <strong>Best for:</strong> small collections, one-off fixes, exploratory work.<br><br>
+      <strong>Drawback:</strong> doesn't scale — N documents = N statements.
+    </div>
+  </div>
+  <div style="border:1.5px solid #16a34a; border-radius:6px; padding:1rem; background:#f0fdf4;">
+    <div style="font-weight:700; margin-bottom:0.4rem;">Option B — Aggregation pipeline</div>
+    <div style="font-size:0.85rem; line-height:1.6; color:#444;">
+      One pipeline rewrites the whole collection, classifies each document by its unique fields, and writes results back via <code>$merge</code>.<br><br>
+      <strong>Best for:</strong> bulk migrations on real data.
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:1rem; font-size:0.85rem; color:#555;">
+We'll walk through both — the choice depends on collection size and how much logic you need to express.
+</div>
+
+---
+
+# Option A — Manual `replace_one`
+
+Rewrite each document with normalized fields and a `product_type` discriminator:
+
+```python
+books.replace_one(
+    { "_id": 1 },
+    {
+        "_id": 1, "product_id": 34538756,
+        "product_type": "book",                  # discriminator added
+        "description": "...",                    # was "details"
+        "authors": ["Shannon Bradshaw", "..."],  # always an array
+        # ... rest of normalized fields
+    }
+)
+```
+
+<div style="margin-top:0.8rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.82rem;">
+  Repeat for each <code>_id</code>. Full version: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-a-manual-updates">notes/7a — Option A</a>
+</div>
+
+---
+
+# Option B — Aggregation Pipeline
+
+Two passes — Pass 1 normalizes field names, Pass 2 classifies each doc by its unique fields.
+
+**Pass 1 — the `$ifNull` trick** to resolve inconsistent field names:
+
+```python
+books.aggregate([
+    { "$project": {
+        "description": { "$ifNull": ["$desc", "$description", "$details", "Unspecified"] },
+        "authors":     { "$cond": {
+                           "if":   { "$isArray": "$authors" },
+                           "then": "$authors",
+                           "else": [{ "$ifNull": ["$author", "Unspecified"] }]
+                        }},
+        # ... pass through the rest
+    }},
+    { "$merge": { "into": "books", "on": "_id", "whenMatched": "replace" } }
 ])
 ```
 
-Notice: inconsistent field names (`desc` vs `details`), `author` vs `authors` — the pattern migration will normalize these.
+`$merge` writes the projection back into `books` (`whenMatched: "replace"`).
 
 ---
 
-# Option A — Manual Updates (`replaceOne`)
+# Pass 2 — Classify by Unique Fields
 
-Replace each document with a fully normalized shape including `product_type`:
+After Pass 1, every document has `product_type: "Unspecified"`. Pass 2 sets the correct value by matching on a field unique to each subtype:
 
-```javascript
-db.books.replaceOne({ _id: 1 }, {
-  _id: 1, product_id: 34538756, product_type: "book",
-  title: "MongoDB: The Definitive Guide",
-  description: "MongoDB explained by MongoDB champions",
-  authors: ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
-  publisher: "O'Reilly", language: "English",
-  pages: 514, catalogues: { isbn10: "1491954469", isbn13: "978-1491954461" }
-})
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem; margin-top:0.8rem; font-size:0.78rem;">
+  <div style="border:1.5px solid #f97316; border-radius:6px; padding:0.55rem; background:#fff7ed;">
+    <div style="font-weight:700; margin-bottom:0.2rem;">audiobook</div>
+    <code>length_minutes &gt;= 0</code>
+  </div>
+  <div style="border:1.5px solid #f97316; border-radius:6px; padding:0.55rem; background:#fff7ed;">
+    <div style="font-weight:700; margin-bottom:0.2rem;">book</div>
+    <code>pages</code> &amp; <code>catalogues</code> exist
+  </div>
+  <div style="border:1.5px solid #f97316; border-radius:6px; padding:0.55rem; background:#fff7ed;">
+    <div style="font-weight:700; margin-bottom:0.2rem;">ebook</div>
+    <code>eformats</code> exists
+  </div>
+</div>
+
+```python
+# One pipeline per type — audiobook example:
+books.aggregate([
+    { "$match": { "product_type": "Unspecified", "length_minutes": { "$gte": 0 } } },
+    { "$set":   { "product_type": "audiobook" } },
+    { "$merge": { "into": "books", "on": "_id", "whenMatched": "replace" } }
+])
 ```
 
-```javascript
-db.books.replaceOne({ _id: 2 }, {
-  _id: 2, product_id: 44538756, product_type: "ebook",
-  title: "MongoDB: The Definitive Guide",
-  description: "MongoDB explained by MongoDB champions",
-  authors: ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
-  publisher: "O'Reilly", language: "English",
-  eformats: { epub: { pages: 774 }, pdf: { pages: 502 } }, isbn10: "1491954469"
-})
-```
-
-Works for small collections. For bulk migrations, use an aggregation pipeline.
-
----
-
-# Option B — Aggregation Pipeline (`$project` + `$merge`)
-
-Normalize all documents in one pass:
-
-```javascript
-var applyInheritancePattern = [
-  { $project: {
-      _id: "$_id",
-      product_id: { $ifNull: ["$product_id", NumberInt(0)] },
-      product_type: { $ifNull: ["$product_type", "Unspecified"] },
-      title: "$title",
-      description: { $ifNull: ["$desc", "$description", "$details", "Unspecified"] },
-      authors: { $cond: {
-        if: { $isArray: "$authors" }, then: "$authors",
-        else: [{ $ifNull: ["$author", "Unspecified"] }]
-      }},
-      publisher: "$publisher", language: "$language",
-      pages: "$pages", catalogues: "$catalogues",
-      eformats: "$eformats", isbn10: "$isbn10",
-      narrator: "$narrator", length_minutes: "$length_minutes"
-  }},
-  { $merge: { into: "books", on: "_id", whenMatched: "replace", whenNotMatched: "discard" }}
-]
-
-db.books.aggregate(applyInheritancePattern)
-```
-
-`$ifNull` resolves inconsistent field names; `$merge` writes results back to the same collection.
-
----
-
-# Cleanup — Classify by Type
-
-After the initial pass, documents with `product_type: "Unspecified"` still need classification.
-
-**Audiobooks** — have `length_minutes`:
-
-```javascript
-var cleanupAudiobooks = [
-  { $match: { $and: [{ product_type: "Unspecified" }, { length_minutes: { $gte: 0 } }] }},
-  { $set: { product_type: "audiobook" }},
-  { $merge: { into: "books", on: "_id", whenMatched: "replace", whenNotMatched: "discard" }}
-]
-db.books.aggregate(cleanupAudiobooks)
-```
-
-**Printed books** — have `pages` and `catalogues`:
-
-```javascript
-var cleanupBooks = [
-  { $match: { $and: [{ product_type: "Unspecified" }, { pages: { $gte: 0 } }, { catalogues: { $exists: true } }] }},
-  { $set: { product_type: "book" }},
-  { $merge: { into: "books", on: "_id", whenMatched: "replace", whenNotMatched: "discard" }}
-]
-db.books.aggregate(cleanupBooks)
-```
-
-**Ebooks** — have `eformats`:
-
-```javascript
-var cleanupEbooks = [
-  { $match: { $and: [{ product_type: "Unspecified" }, { eformats: { $exists: true } }] }},
-  { $set: { product_type: "ebook" }},
-  { $merge: { into: "books", on: "_id", whenMatched: "replace", whenNotMatched: "discard" }}
-]
-db.books.aggregate(cleanupEbooks)
-```
+<div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.82rem;">
+  Full pipelines for all three types: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-b-aggregation-pipeline-automation">notes/7a — Option B</a>
+</div>
 
 ---
 
 # Verify Results
 
-```javascript
-db.books.find()
+```python
+for doc in books.find():
+    print(doc)
 ```
 
-Expected result — all three documents normalized:
+Each document now carries a `product_type` and consistent fields — ready to query polymorphically:
 
-```json
-[
-  { "_id": 1, "product_type": "book",      "title": "...", "pages": 514, "catalogues": { ... } },
-  { "_id": 2, "product_type": "ebook",     "title": "...", "eformats": { ... } },
-  { "_id": 3, "product_type": "audiobook", "title": "...", "narrator": "...", "length_minutes": 1200 }
-]
+```python
+books.find({ "product_type": "audiobook" })   # type-specific query
+books.find()                                   # all types together
 ```
 
-Query a specific type:
-
-```javascript
-db.books.find({ product_type: "audiobook" })
-```
+<div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
+  Expected output for all three documents: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-4-verify-the-updates">notes/7a — Verify</a>
+</div>
 
 ---
 
@@ -356,7 +398,7 @@ db.books.find({ product_type: "audiobook" })
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
   <div style="border:1.5px solid #16a34a; border-radius:6px; padding:1rem; background:#f0fdf4;">
     <div style="font-weight:700; margin-bottom:0.5rem; color:#166534;">Single query</div>
-    <div style="font-size:0.88rem; color:#444;">One <code>db.books.find()</code> retrieves all product types — no UNIONs, no application-level merging.</div>
+    <div style="font-size:0.88rem; color:#444;">One <code>books.find()</code> retrieves all product types — no UNIONs, no application-level merging.</div>
   </div>
   <div style="border:1.5px solid #16a34a; border-radius:6px; padding:1rem; background:#f0fdf4;">
     <div style="font-weight:700; margin-bottom:0.5rem; color:#166534;">Flexible schema</div>
@@ -379,11 +421,11 @@ db.books.find({ product_type: "audiobook" })
 - Always include a **discriminator field** (e.g., `product_type`) on every document — never leave it null or unset
 - **Index** the discriminator field if type-specific queries are common
 - Keep common fields **consistently named** across all subtypes
-- Use the **Aggregation Framework** (`$project` + `$merge`) for bulk migrations — `replaceOne` in a loop is slow at scale
+- Use the **Aggregation Framework** (`$project` + `$merge`) for bulk migrations — `replace_one` in a loop is slow at scale
 - If a subtype's fields diverge so much that common queries rarely apply, consider **separate collections** instead
 
 <div style="margin-top:1.2rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.7rem 1rem; font-size:0.88rem;">
-  See <code>notes/7a - MongoDB Data Modeling Inheritance Pattern.md</code> for the full mongosh walkthrough.
+  Full mongosh walkthrough: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/7a — Inheritance Pattern</a>
 </div>
 
 ---
@@ -418,58 +460,71 @@ new review → update average_rating + review_count in the book document → fas
 
 # Use Case — Book Ratings
 
-Store pre-computed `review_count`, `total_stars`, and `average_rating` directly in the book document:
+Pre-compute `review_count`, `total_stars`, `average_rating` in the book document:
 
 ```json
-{
-  "title": "MongoDB: The Definitive Guide",
-  "rating": {
-    "review_count": 3,
-    "total_stars": 12.9,
-    "average_rating": 4.3
-  }
-}
+{ "rating": { "review_count": 3, "total_stars": 12.9, "average_rating": 4.3 } }
 ```
 
-**Update logic on each new review:**
+**On each new review** — atomic `$inc`, then recompute the average:
 
-1. `total_stars += new_star_rating`
-2. `review_count += 1`
-3. `average_rating = total_stars / review_count`
+```python
+def add_review(book_id, star_rating):
+    updated = books.find_one_and_update(
+        { "_id": book_id },
+        { "$inc": { "rating.review_count": 1,
+                    "rating.total_stars":  star_rating } },
+        return_document=ReturnDocument.AFTER,
+    )
+    avg = updated["rating"]["total_stars"] / updated["rating"]["review_count"]
+    books.update_one({ "_id": book_id }, { "$set": { "rating.average_rating": avg } })
+```
 
-The book document always has the current average — no aggregation needed at read time.
+---
+
+# Computed in Action
+
+```python
+# 1. Insert a new book — initialize the rating subdoc to zeros
+books.insert_one({
+    "_id": 1, "title": "MongoDB: The Definitive Guide",
+    "rating": { "review_count": 0, "total_stars": 0.0, "average_rating": 0.0 }
+})
+
+# 2. Each incoming review calls add_review — totals + average update on every write
+add_review(1, 5.0)
+add_review(1, 4.0)
+add_review(1, 4.0)
+
+# 3. Reads are O(1) — no aggregation, just a field lookup
+print(books.find_one({ "_id": 1 }, { "rating.average_rating": 1 }))
+# → { "_id": 1, "rating": { "average_rating": 4.333... } }
+```
+
+<div style="margin-top:0.6rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.5rem 0.9rem; font-size:0.85rem;">
+  The average is computed at <em>write</em> time and cached. Every reader sees the latest value with one field read.
+</div>
 
 ---
 
 # Roll-Up Operations
 
-Roll-ups are a variant: **aggregate periodically** into a summary collection rather than updating on every write.
+A variant: **aggregate periodically** into a summary collection instead of updating on every write. Use case: internal dashboard with daily totals by product type.
 
-**Use case:** internal dashboard showing daily totals by product type.
-
-```javascript
-var rollUpProductTypeSummary = [
-  { $group: {
-      _id: "$product_type",
-      count: { $sum: 1 },
-      averageNumberOfAuthors: { $avg: { $size: "$authors" } }
-  }}
+```python
+roll_up_pipeline = [
+    { "$group": {
+        "_id": "$product_type",
+        "count": { "$sum": 1 },
+        "average_number_of_authors": { "$avg": { "$size": "$authors" } }
+    }},
+    { "$merge": { "into": "book_summary", "on": "_id", "whenMatched": "replace" } }
 ]
 
-db.books.aggregate(rollUpProductTypeSummary)
+books.aggregate(roll_up_pipeline)   # run nightly via cron / scheduler
 ```
 
-Sample output stored to a `book_summary` collection:
-
-```json
-[
-  { "_id": "audiobook", "count": 1, "averageNumberOfAuthors": 1 },
-  { "_id": "ebook",     "count": 1, "averageNumberOfAuthors": 3 },
-  { "_id": "book",      "count": 1, "averageNumberOfAuthors": 3 }
-]
-```
-
-Run this pipeline on a **schedule** (e.g., nightly cron) — readers always get a fast lookup, never a live aggregation.
+Readers query `book_summary` directly — fast lookup, never a live aggregation.
 
 ---
 
@@ -496,7 +551,7 @@ Run this pipeline on a **schedule** (e.g., nightly cron) — readers always get 
 </div>
 
 <div style="margin-top:1.2rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.7rem 1rem; font-size:0.88rem;">
-  See <code>notes/7b - MongoDB Data Modeling Computed and Approximation Pattern.md</code> for the full example.
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md">notes/7b — Computed &amp; Approximation</a>
 </div>
 
 ---
@@ -521,29 +576,50 @@ When **exact values are not critical** and the update cost is too high, update o
 
 ---
 
-# How It Works — 1-in-10 Probabilistic Updates
+# 1-in-10 Probabilistic Updates
 
 The logic lives in **application code**, not the database schema:
 
 ```python
 import random
 
-def add_review(book_id, star_rating):
-    if random.randint(1, 10) == 10:          # ~10% chance
-        multiplied_rating = star_rating * 10  # extrapolate as if 10 reviews
-        db.books.update_one(
+def add_review_approx(book_id, star_rating):
+    if random.randint(1, 10) == 10:                # ~10% chance
+        books.update_one(
             { "_id": book_id },
-            { "$inc": {
-                "rating.review_count": 10,
-                "rating.total_stars": multiplied_rating
-            }}
+            { "$inc": { "rating.review_count": 10,        # extrapolate ×10
+                        "rating.total_stars":  star_rating * 10 } },
         )
-        # recalculate average_rating from total_stars / review_count
+        # then recompute rating.average_rating as before
 ```
 
-- ~90% of reviews → **no write to the book document**
-- ~10% of reviews → write with ×10 multiplier to maintain statistical validity
-- Result: ~90% fewer writes; accuracy loss is proportional to 1/N (negligible at high volume)
+~90% of reviews skip the write; the 10% that hit extrapolate ×10 to keep totals statistically valid. Accuracy loss is proportional to 1/N — negligible at high volume.
+
+---
+
+# Approximation in Action
+
+```python
+# 1. Insert a hot book — initialize the rating subdoc
+books.insert_one({
+    "_id": 2, "title": "Hot Book",
+    "rating": { "review_count": 0, "total_stars": 0.0, "average_rating": 0.0 }
+})
+
+# 2. Simulate 1000 incoming 5-star reviews
+for _ in range(1000):
+    add_review_approx(2, 5.0)
+
+# 3. Inspect — review_count ≈ 1000, but the document was written only ~100 times
+print(books.find_one({ "_id": 2 }, { "rating": 1 }))
+# → { "_id": 2, "rating": { "review_count": ~1000,
+#                            "total_stars":  ~5000,
+#                            "average_rating": 5.0 } }
+```
+
+<div style="margin-top:0.6rem; background:#f0fdf4; border-left:4px solid #16a34a; padding:0.5rem 0.9rem; font-size:0.85rem;">
+  1000 reviews → ~100 writes. Totals still reflect the full population because each write counts as 10.
+</div>
 
 ---
 
@@ -631,5 +707,5 @@ def add_review(book_id, star_rating):
 
 See the matching notes for full code listings, sample documents, and command output:
 
-- `notes/7a - MongoDB Data Modeling Inheritance Pattern.md`
-- `notes/7b - MongoDB Data Modeling Computed and Approximation Pattern.md`
+- [notes/7a — MongoDB Data Modeling: Inheritance Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md)
+- [notes/7b — MongoDB Data Modeling: Computed and Approximation Patterns](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md)

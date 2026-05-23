@@ -1,6 +1,6 @@
 # MongoDB Data Modeling: Inheritance Pattern
 
-**Course:** CSCI 112 / 212 - Contemporary Databases  
+**Course:** CSCI 112 / 212 - Contemporary Databases
 **Topic:** MongoDB Inheritance Pattern
 
 ---
@@ -8,6 +8,8 @@
 ## Overview
 
 In this module, we explore the **Inheritance Pattern** in MongoDB data modeling. This pattern allows us to store related but distinct document types within a single collection by leveraging polymorphism — a key feature of MongoDB's flexible schema design.
+
+All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM.
 
 ---
 
@@ -49,6 +51,30 @@ Using the Inheritance Pattern, we store all these documents in a single `books` 
 
 ---
 
+## PyMongo Setup
+
+Activate your virtual environment and install PyMongo if you haven't already:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Linux / macOS
+pip install pymongo
+```
+
+Connect to your MongoDB instance:
+
+```python
+from pymongo import MongoClient
+
+client = MongoClient("mongodb://<vm_ip_address>:27017/")
+db     = client["bookstore"]
+books  = db["books"]
+```
+
+The `books` variable is the **collection handle** — every example below calls methods on it.
+
+---
+
 ## Applying the Inheritance Pattern to Existing Data
 
 In real-world applications, you may need to transform an existing collection to follow the Inheritance Pattern. MongoDB's Aggregation Framework is a powerful tool for this task.
@@ -57,62 +83,57 @@ In real-world applications, you may need to transform an existing collection to 
 
 ## Step-by-Step Example
 
-We will apply the Inheritance Pattern to a collection named:
-
-```
-books
-```
-
-This collection contains three documents representing different book types, each with slightly different structures.
+We will apply the Inheritance Pattern to a collection named `books`. This collection contains three documents representing different book types, each with slightly different structures.
 
 ### Step 1: Insert Sample Documents
 
-First, let's insert the sample documents into our collection:
+First, insert the sample documents into our collection:
 
-```javascript
-db.books.insertMany([
-  {
-    "_id": 1,
-    "product_id": 34538756,
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "details": "MongoDB explained by MongoDB champions",
-    "authors": [ "Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow" ],
-    "publisher": "O'Reilly",
-    "language": "English",
-    "pages": 514,
-    "catalogues": { "isbn10": "1491954469", "isbn13": "978-1491954461" }
-  },
-  {
-    "_id": 2,
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "desc": "MongoDB explained by MongoDB champions",
-    "authors": "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
-    "publisher": "O'Reilly",
-    "language": "English",
-    "eformats": { "epub": { "pages": 774 }, "pdf": { "pages": 502 } },
-    "isbn10": "1491954469"
-  },
-  {
-    "_id": 3,
-    "product_id": 54538756,
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "desc": "The complete book of MongoDB by its employees",
-    "author": "Eoin Brazil",
-    "narrator": "Eoin Brazil",
-    "publisher": "O'Reilly",
-    "language": "English",
-    "length_minutes": 1200
-  }
+```python
+books.insert_many([
+    {
+        "_id": 1,
+        "product_id": 34538756,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "details": "MongoDB explained by MongoDB champions",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
+        "publisher": "O'Reilly",
+        "language": "English",
+        "pages": 514,
+        "catalogues": {"isbn10": "1491954469", "isbn13": "978-1491954461"}
+    },
+    {
+        "_id": 2,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "desc": "MongoDB explained by MongoDB champions",
+        "authors": "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
+        "publisher": "O'Reilly",
+        "language": "English",
+        "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
+        "isbn10": "1491954469"
+    },
+    {
+        "_id": 3,
+        "product_id": 54538756,
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "desc": "The complete book of MongoDB by its employees",
+        "author": "Eoin Brazil",
+        "narrator": "Eoin Brazil",
+        "publisher": "O'Reilly",
+        "language": "English",
+        "length_minutes": 1200
+    }
 ])
 ```
 
 ### Step 2: Review the Documents
 
-Run the following command in `mongosh` to inspect the documents:
-
-```javascript
-db.books.find()
+```python
+for doc in books.find():
+    print(doc)
 ```
+
+Notice the inconsistencies: `desc` vs `details` vs `description`, `author` (string) vs `authors` (array or comma-separated string), missing `product_id` on document 2. The pattern migration will normalize these.
 
 ---
 
@@ -127,65 +148,65 @@ We will update each document to:
 
 ### Option A: Manual Updates
 
-You can manually update each document using `replaceOne`:
+You can manually update each document using `replace_one`:
 
 #### Document 1: Printed Book
 
-```javascript
-db.books.replaceOne(
-  { _id: 1 },
-  {
-    "_id": 1,
-    "product_id": 34538756,
-    "product_type": "book",
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "description": "MongoDB explained by MongoDB champions",
-    "authors": [ "Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow" ],
-    "publisher": "O'Reilly",
-    "language": "English",
-    "pages": 514,
-    "catalogues": { "isbn10": "1491954469", "isbn13": "978-1491954461" }
-  }
+```python
+books.replace_one(
+    {"_id": 1},
+    {
+        "_id": 1,
+        "product_id": 34538756,
+        "product_type": "book",
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "description": "MongoDB explained by MongoDB champions",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
+        "publisher": "O'Reilly",
+        "language": "English",
+        "pages": 514,
+        "catalogues": {"isbn10": "1491954469", "isbn13": "978-1491954461"}
+    }
 )
 ```
 
 #### Document 2: Ebook
 
-```javascript
-db.books.replaceOne(
-  { _id: 2 },
-  {
-    "_id": 2,
-    "product_id": 44538756,
-    "product_type": "ebook",
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "description": "MongoDB explained by MongoDB champions",
-    "authors": [ "Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow" ],
-    "publisher": "O'Reilly",
-    "language": "English",
-    "eformats": { "epub": { "pages": 774 }, "pdf": { "pages": 502 } },
-    "isbn10": "1491954469"
-  }
+```python
+books.replace_one(
+    {"_id": 2},
+    {
+        "_id": 2,
+        "product_id": 44538756,
+        "product_type": "ebook",
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "description": "MongoDB explained by MongoDB champions",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
+        "publisher": "O'Reilly",
+        "language": "English",
+        "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
+        "isbn10": "1491954469"
+    }
 )
 ```
 
 #### Document 3: Audiobook
 
-```javascript
-db.books.replaceOne(
-  { _id: 3 },
-  {
-    "_id": 3,
-    "product_id": 54538756,
-    "product_type": "audiobook",
-    "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
-    "description": "The complete book of MongoDB by its employees",
-    "authors": [ "Eoin Brazil" ],
-    "narrator": "Eoin Brazil",
-    "publisher": "O'Reilly",
-    "language": "English",
-    "length_minutes": 1200
-  }
+```python
+books.replace_one(
+    {"_id": 3},
+    {
+        "_id": 3,
+        "product_id": 54538756,
+        "product_type": "audiobook",
+        "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
+        "description": "The complete book of MongoDB by its employees",
+        "authors": ["Eoin Brazil"],
+        "narrator": "Eoin Brazil",
+        "publisher": "O'Reilly",
+        "language": "English",
+        "length_minutes": 1200
+    }
 )
 ```
 
@@ -195,151 +216,128 @@ You can also use the MongoDB Aggregation Framework to apply the Inheritance Patt
 
 #### Apply Inheritance Pattern to All Documents
 
-```javascript
-var apply_inheritance_pattern_to_books_pipeline = [
-  {
-    $project: {
-      _id: "$_id",
-      product_id: { $ifNull: ["$product_id", NumberInt(0)] },
-      product_type: {
-        $ifNull: ["$product_type", "Unspecified"],
-      },
-      title: "$title",
-      description: {
-        $ifNull: [
-          "$desc",
-          "$description",
-          "$details",
-          "Unspecified",
-        ],
-      },
-      authors: {
-        $cond: {
-          if: { $isArray: "$authors" },
-          then: "$authors",
-          else: {
-            $cond: {
-              if: { $isArray: ["$author"] },
-              then: "$author",
-              else: [{ $ifNull: ["$author", "Unspecified"] }]
-            }
-          }
+```python
+apply_inheritance_pattern_pipeline = [
+    {
+        "$project": {
+            "_id": "$_id",
+            "product_id":   {"$ifNull": ["$product_id", 0]},
+            "product_type": {"$ifNull": ["$product_type", "Unspecified"]},
+            "title": "$title",
+            "description": {
+                "$ifNull": ["$desc", "$description", "$details", "Unspecified"]
+            },
+            "authors": {
+                "$cond": {
+                    "if":   {"$isArray": "$authors"},
+                    "then": "$authors",
+                    "else": {
+                        "$cond": {
+                            "if":   {"$isArray": ["$author"]},
+                            "then": "$author",
+                            "else": [{"$ifNull": ["$author", "Unspecified"]}]
+                        }
+                    }
+                }
+            },
+            "publisher": "$publisher",
+            "language":  "$language",
+            "pages":      "$pages",
+            "catalogues": "$catalogues",
+            "eformats":   "$eformats",
+            "isbn10":     "$isbn10",
+            "isbn13":     "$isbn13",
+            "narrator":       "$narrator",
+            "length_minutes": "$length_minutes"
         }
-      },
-      publisher: "$publisher",
-      language: "$language",
-      pages: "$pages",
-      catalogues: "$catalogues",
-      eformats: "$eformats",
-      isbn10: "$isbn10",
-      isbn13: "$isbn13",
-      narrator: "$narrator",
-      length_minutes: "$length_minutes",
     },
-  },
-  {
-    $merge: {
-      into: "books",
-      on: "_id",
-      whenMatched: "replace",
-      whenNotMatched: "discard",
-    },
-  },
+    {
+        "$merge": {
+            "into": "books",
+            "on": "_id",
+            "whenMatched": "replace",
+            "whenNotMatched": "discard"
+        }
+    }
 ]
 
-db.books.aggregate(apply_inheritance_pattern_to_books_pipeline)
+books.aggregate(apply_inheritance_pattern_pipeline)
 ```
 
 #### Update Audiobook Product Types
 
-```javascript
-var cleanup_audiobook_entries_in_book_pipeline = [
-  {
-    $match: {
-      $and: [{ product_type: "Unspecified" }, { length_minutes: { $gte: 0 } }],
-    },
-  },
-  {
-    $set: { product_type: "audiobook" },
-  },
-  {
-    $merge: {
-      into: "books",
-      on: "_id",
-      whenMatched: "replace",
-      whenNotMatched: "discard",
-    },
-  },
-];
+```python
+cleanup_audiobook_pipeline = [
+    {"$match": {
+        "$and": [
+            {"product_type": "Unspecified"},
+            {"length_minutes": {"$gte": 0}}
+        ]
+    }},
+    {"$set": {"product_type": "audiobook"}},
+    {"$merge": {
+        "into": "books",
+        "on": "_id",
+        "whenMatched": "replace",
+        "whenNotMatched": "discard"
+    }}
+]
 
-db.books.aggregate(cleanup_audiobook_entries_in_book_pipeline);
+books.aggregate(cleanup_audiobook_pipeline)
 ```
 
 #### Update Book Product Types
 
-```javascript
-var cleanup_book_entries_in_book_pipeline = [
-  {
-    $match: {
-      $and: [
-        { product_type: "Unspecified" }, 
-        { pages: { $gte: 0 } },
-        { catalogues: { $exists: true } }
-      ]
-    }
-  },
-  {
-    $set: { product_type: "book" }
-  },
-  {
-    $merge: {
-      into: "books",
-      on: "_id",
-      whenMatched: "replace",
-      whenNotMatched: "discard"
-    }
-  }
-];
+```python
+cleanup_book_pipeline = [
+    {"$match": {
+        "$and": [
+            {"product_type": "Unspecified"},
+            {"pages": {"$gte": 0}},
+            {"catalogues": {"$exists": True}}
+        ]
+    }},
+    {"$set": {"product_type": "book"}},
+    {"$merge": {
+        "into": "books",
+        "on": "_id",
+        "whenMatched": "replace",
+        "whenNotMatched": "discard"
+    }}
+]
 
-db.books.aggregate(cleanup_book_entries_in_book_pipeline);
+books.aggregate(cleanup_book_pipeline)
 ```
 
 #### Update Ebook Product Types
 
-```javascript
-var cleanup_ebook_entries_in_book_pipeline = [
-  {
-    $match: {
-      $and: [
-        { product_type: "Unspecified" }, 
-        { eformats: { $exists: true } }
-      ]
-    }
-  },
-  {
-    $set: { product_type: "ebook" }
-  },
-  {
-    $merge: {
-      into: "books",
-      on: "_id",
-      whenMatched: "replace",
-      whenNotMatched: "discard"
-    }
-  }
-];
+```python
+cleanup_ebook_pipeline = [
+    {"$match": {
+        "$and": [
+            {"product_type": "Unspecified"},
+            {"eformats": {"$exists": True}}
+        ]
+    }},
+    {"$set": {"product_type": "ebook"}},
+    {"$merge": {
+        "into": "books",
+        "on": "_id",
+        "whenMatched": "replace",
+        "whenNotMatched": "discard"
+    }}
+]
 
-db.books.aggregate(cleanup_ebook_entries_in_book_pipeline);
+books.aggregate(cleanup_ebook_pipeline)
 ```
 
 ---
 
 ## Step 4: Verify the Updates
 
-Run the following command to verify that all documents now follow the Inheritance Pattern:
-
-```javascript
-db.books.find()
+```python
+for doc in books.find():
+    print(doc)
 ```
 
 Expected output:
@@ -352,11 +350,11 @@ Expected output:
     "product_type": "book",
     "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
     "description": "MongoDB explained by MongoDB champions",
-    "authors": [ "Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow" ],
+    "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
     "publisher": "O'Reilly",
     "language": "English",
     "pages": 514,
-    "catalogues": { "isbn10": "1491954469", "isbn13": "978-1491954461" }
+    "catalogues": {"isbn10": "1491954469", "isbn13": "978-1491954461"}
   },
   {
     "_id": 2,
@@ -364,10 +362,10 @@ Expected output:
     "product_type": "ebook",
     "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
     "description": "MongoDB explained by MongoDB champions",
-    "authors": [ "Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow" ],
+    "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
     "publisher": "O'Reilly",
     "language": "English",
-    "eformats": { "epub": { "pages": 774 }, "pdf": { "pages": 502 } },
+    "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
     "isbn10": "1491954469"
   },
   {
@@ -376,13 +374,20 @@ Expected output:
     "product_type": "audiobook",
     "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
     "description": "The complete book of MongoDB by its employees",
-    "authors": [ "Eoin Brazil" ],
+    "authors": ["Eoin Brazil"],
     "narrator": "Eoin Brazil",
     "publisher": "O'Reilly",
     "language": "English",
     "length_minutes": 1200
   }
 ]
+```
+
+Query a specific type:
+
+```python
+for doc in books.find({"product_type": "audiobook"}):
+    print(doc)
 ```
 
 ---
@@ -400,5 +405,6 @@ Expected output:
 
 - [MongoDB Aggregation Framework Documentation](https://www.mongodb.com/docs/manual/aggregation/)
 - [MongoDB Schema Design Best Practices](https://www.mongodb.com/docs/manual/core/data-model-design/)
+- [PyMongo Documentation](https://pymongo.readthedocs.io/)
 
 For further questions or assistance, please reach out during office hours or post in the course discussion forum.
