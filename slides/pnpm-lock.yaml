@@ -104,7 +104,7 @@ importers:
         specifier: ^1.40.0
         version: 1.60.0
 
-  07a-modeling-inheritance-computed-approximation:
+  07-mongodb-indexing:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -120,7 +120,7 @@ importers:
         specifier: ^1.40.0
         version: 1.60.0
 
-  07b-modeling-reference-versioning-single-collection:
+  08a-modeling-inheritance-computed-approximation:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -136,7 +136,7 @@ importers:
         specifier: ^1.40.0
         version: 1.60.0
 
-  07c-modeling-subset:
+  08b-modeling-reference-versioning-single-collection:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -152,7 +152,7 @@ importers:
         specifier: ^1.40.0
         version: 1.60.0
 
-  08-dynamodb-intro:
+  08c-modeling-subset:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -168,7 +168,7 @@ importers:
         specifier: ^1.40.0
         version: 1.60.0
 
-  09-dynamodb-data-modeling:
+  09-dynamodb-intro:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -178,13 +178,29 @@ importers:
         version: 0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130))
       slidev-theme-discs:
         specifier: github:zzenonn/discs-slidev-template
-        version: git+https://git@github.com:zzenonn/discs-slidev-template.git#978552fc11891d6eaffca0a0d4401d38bca2b949(@slidev/cli@0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4))(@slidev/types@0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130)))
+        version: https://codeload.github.com/zzenonn/discs-slidev-template/tar.gz/978552fc11891d6eaffca0a0d4401d38bca2b949(@slidev/cli@0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4))(@slidev/types@0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130)))
     devDependencies:
       playwright-chromium:
         specifier: ^1.40.0
         version: 1.60.0
 
-  10-dynamodb-design-patterns:
+  10-dynamodb-data-modeling:
+    dependencies:
+      '@slidev/cli':
+        specifier: ^0.49.28
+        version: 0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4)
+      '@slidev/types':
+        specifier: ^0.49.28
+        version: 0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130))
+      slidev-theme-discs:
+        specifier: github:zzenonn/discs-slidev-template
+        version: https://codeload.github.com/zzenonn/discs-slidev-template/tar.gz/978552fc11891d6eaffca0a0d4401d38bca2b949(@slidev/cli@0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4))(@slidev/types@0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130)))
+    devDependencies:
+      playwright-chromium:
+        specifier: ^1.40.0
+        version: 1.60.0
+
+  11-dynamodb-design-patterns:
     dependencies:
       '@slidev/cli':
         specifier: ^0.49.28
@@ -2907,14 +2923,6 @@ packages:
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
-
-  slidev-theme-discs@git+https://git@github.com:zzenonn/discs-slidev-template.git#978552fc11891d6eaffca0a0d4401d38bca2b949:
-    resolution: {commit: 978552fc11891d6eaffca0a0d4401d38bca2b949, repo: git@github.com:zzenonn/discs-slidev-template.git, type: git}
-    version: 0.1.0
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@slidev/cli': '>=0.49.0'
-      '@slidev/types': '>=0.49.0'
 
   slidev-theme-discs@https://codeload.github.com/zzenonn/discs-slidev-template/tar.gz/978552fc11891d6eaffca0a0d4401d38bca2b949:
     resolution: {tarball: https://codeload.github.com/zzenonn/discs-slidev-template/tar.gz/978552fc11891d6eaffca0a0d4401d38bca2b949}
@@ -6447,11 +6455,6 @@ snapshots:
       totalist: 3.0.1
 
   sisteransi@1.0.5: {}
-
-  slidev-theme-discs@git+https://git@github.com:zzenonn/discs-slidev-template.git#978552fc11891d6eaffca0a0d4401d38bca2b949(@slidev/cli@0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4))(@slidev/types@0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130))):
-    dependencies:
-      '@slidev/cli': 0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4)
-      '@slidev/types': 0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130))
 
   slidev-theme-discs@https://codeload.github.com/zzenonn/discs-slidev-template/tar.gz/978552fc11891d6eaffca0a0d4401d38bca2b949(@slidev/cli@0.49.29(@babel/parser@7.29.3)(@nuxt/kit@3.21.6)(@types/markdown-it@14.1.2)(@types/node@18.19.130)(@vue/compiler-sfc@3.5.34)(playwright-chromium@1.60.0)(postcss@8.5.15)(rollup@4.60.4))(@slidev/types@0.49.29(@nuxt/kit@3.21.6)(@vue/compiler-sfc@3.5.34)(postcss@8.5.15)(rollup@4.60.4)(typescript@5.9.3)(vite@5.4.21(@types/node@18.19.130))):
     dependencies:

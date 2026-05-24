@@ -64,16 +64,28 @@ Practical guide for deploying MongoDB clusters on Amazon Web Services, covering 
 - Scaling and monitoring in AWS environments
 - Security and backup strategies
 
+### [07 - MongoDB Indexing](07%20-%20MongoDB%20Indexing.md)
+**MongoDB Indexing**
+
+Comprehensive guide to MongoDB indexing — how queries are executed, what index types are available, how to design indexes for data modeling patterns, and how to maintain indexes in production.
+
+**Key Topics:**
+- COLLSCAN vs IXSCAN; reading `explain()` output
+- Index types: single-field, compound (ESR rule), multikey, unique, partial, sparse, TTL, text, wildcard
+- Index design for data modeling patterns (`docType`, `relatedTo`, `schema_version`)
+- Covered queries and index intersection
+- Write amplification and safe index management
+
 ### MongoDB Data Modeling Patterns
 
-- **[7a - Inheritance Pattern](7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md)**
-- **[7b - Computed and Approximation Pattern](7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md)**
-- **[7c - Reference Pattern](7c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)**
-- **[7d - Schema Versioning](7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning%20copy.md)**
-- **[7e - Single Collection](7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)**
-- **[7f - Subset Pattern](7f%20-%20MongoDB%20Data%20Modeling%20Subset%20Pattern.md)**
+- **[8a - Inheritance Pattern](8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md)**
+- **[8b - Computed and Approximation Pattern](8b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md)**
+- **[8c - Reference Pattern](8c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)**
+- **[8d - Schema Versioning](8d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md)**
+- **[8e - Single Collection](8e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)**
+- **[8f - Subset Pattern](8f%20-%20MongoDB%20Data%20Modeling%20Subset%20Pattern.md)**
 
-### [08 - Introduction to DynamoDB](08%20-%20Introduction%20to%20DynamoDB.md)
+### [09 - Introduction to DynamoDB](09%20-%20Introduction%20to%20DynamoDB.md)
 **Key-Value and Document Databases with Amazon DynamoDB**
 
 Introduction to Amazon DynamoDB as a serverless, fully managed NoSQL database. Covers core concepts including tables, items, primary keys, secondary indexes, and billing modes. Includes hands-on setup with Python and boto3.
@@ -87,7 +99,7 @@ Introduction to Amazon DynamoDB as a serverless, fully managed NoSQL database. C
 - Basic CRUD operations and query patterns
 - DynamoDB vs. MongoDB comparison
 
-### [09 - DynamoDB Data Modeling](09%20-%20DynamoDB%20Data%20Modeling.md)
+### [10 - DynamoDB Data Modeling](10%20-%20DynamoDB%20Data%20Modeling.md)
 **DynamoDB Data Modeling -- Single-Table Design and Multi-Attribute Keys**
 
 Advanced DynamoDB data modeling techniques for storing multiple entity types in a single table. Covers Global Secondary Indexes, the inverted index pattern, and the multi-attribute keys feature that eliminates synthetic key concatenation.
@@ -100,10 +112,10 @@ Advanced DynamoDB data modeling techniques for storing multiple entity types in 
 - Walkthrough: users, orders, and line items in one table
 - Access-pattern-driven data modeling principles
 
-### [10 - DynamoDB Design Patterns](10%20-%20DynamoDB%20Design%20Patterns.md)
+### [11 - DynamoDB Design Patterns](11%20-%20DynamoDB%20Design%20Patterns.md)
 **DynamoDB Design Patterns -- From Single-Table to Aggregate-Oriented Design**
 
-Revisits the Module 09 single-table design and shows how to improve it using aggregate-oriented design principles. Covers natural keys, item collections, identifying relationships, aggregate boundary decisions, and when to use multiple tables.
+Revisits the Module 10 single-table design and shows how to improve it using aggregate-oriented design principles. Covers natural keys, item collections, identifying relationships, aggregate boundary decisions, and when to use multiple tables.
 
 **Key Topics:**
 - Problems with generic "everything-table" designs
@@ -112,4 +124,4 @@ Revisits the Module 09 single-table design and shows how to improve it using agg
 - Aggregate-oriented design with access correlation analysis
 - When to use multiple tables vs. item collections
 - Short-circuit denormalization, sparse GSIs, hierarchical sort keys
-- Side-by-side comparison of Module 09 vs. improved design
+- Side-by-side comparison of Module 10 vs. improved design
