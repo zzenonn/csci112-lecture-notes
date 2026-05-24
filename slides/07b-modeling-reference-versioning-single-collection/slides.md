@@ -127,27 +127,24 @@ orders     = db["orders"]
 
 # Extended Reference — In Practice
 
-```python
-# Insert a customer (source of truth)
-customers.insert_one({
-    "_id": 123, "name": "Katrina Pope",
-    "street": "123 Main St", "city": "Somewhere", "country": "Someplace"
-})
+When creating an order, fetch only the fields needed and embed them:
 
-# When creating an order, embed the shipping fields
-c = customers.find_one({"_id": 123}, {"name": 1, "street": 1, "city": 1, "country": 1})
+```python
+c = customers.find_one(
+    {"_id": 123}, {"name": 1, "street": 1, "city": 1, "country": 1}
+)
+
 orders.insert_one({
-    "_id": "order_001", "date": "2024-02-18", "customer_id": 123,
-    "shipping_address": {       # extended reference — subset embedded
+    "_id": "order_001", "customer_id": 123,
+    "shipping_address": {
         "name": c["name"], "street": c["street"],
-        "city": c["city"],  "country": c["country"],
+        "city": c["city"], "country": c["country"],
     },
-    "order": [{ "product": "widget", "qty": 5 }]
 })
 ```
 
-<div style="margin-top:0.6rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Reading an order is now one query — <code>shipping_address</code> is already there.
+<div style="margin-top:1rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.8rem 1rem; font-size:0.87rem;">
+  Reading an order is now one query — <code>shipping_address</code> is already embedded.
 </div>
 
 ---
@@ -278,7 +275,7 @@ def get_contacts(customer):
 </div>
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning%20copy.md">notes/7d — Schema Versioning</a>
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md">notes/7d — Schema Versioning</a>
 </div>
 
 ---
@@ -455,5 +452,5 @@ list(books_catalog.find({ "relatedTo": 34538756 }))
 See the matching notes for full code listings, sample documents, and command output:
 
 - [notes/7c — MongoDB Data Modeling: Reference Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)
-- [notes/7d — MongoDB Data Modeling: Schema Versioning Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning%20copy.md)
+- [notes/7d — MongoDB Data Modeling: Schema Versioning Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md)
 - [notes/7e — MongoDB Data Modeling: Single Collection Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)

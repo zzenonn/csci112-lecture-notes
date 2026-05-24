@@ -108,7 +108,7 @@ books.insert_many([
         "_id": 2,
         "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
         "desc": "MongoDB explained by MongoDB champions",
-        "authors": "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
         "publisher": "O'Reilly",
         "language": "English",
         "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
@@ -235,7 +235,7 @@ apply_inheritance_pattern_pipeline = [
                     "then": "$authors",
                     "else": {
                         "$cond": {
-                            "if":   {"$isArray": ["$author"]},
+                            "if":   {"$isArray": "$author"},
                             "then": "$author",
                             "else": [{"$ifNull": ["$author", "Unspecified"]}]
                         }
@@ -342,7 +342,7 @@ for doc in books.find():
     print(doc)
 ```
 
-Expected output:
+Expected output (after Option B — aggregation pipeline only):
 
 ```json
 [
@@ -360,7 +360,7 @@ Expected output:
   },
   {
     "_id": 2,
-    "product_id": 44538756,
+    "product_id": 0,
     "product_type": "ebook",
     "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
     "description": "MongoDB explained by MongoDB champions",
@@ -384,6 +384,8 @@ Expected output:
   }
 ]
 ```
+
+> **Note:** Doc 2's `product_id` is `0` because it was missing from the original document — the pipeline's `$ifNull` defaults it to `0`. The manual Option A approach assigns it `44538756` explicitly. If you need real product IDs for all documents, use Option A or add an `$addFields` stage to set the correct value.
 
 Query a specific type:
 
@@ -446,7 +448,7 @@ books.insert_many([
         "_id": 2,
         "title": "MongoDB: The Definitive Guide: Powerful and Scalable Data Storage",
         "desc": "MongoDB explained by MongoDB champions",
-        "authors": "Shannon Bradshaw, Eoin Brazil, and Christina Chodorow",
+        "authors": ["Shannon Bradshaw", "Eoin Brazil", "Christina Chodorow"],
         "publisher": "O'Reilly",
         "language": "English",
         "eformats": {"epub": {"pages": 774}, "pdf": {"pages": 502}},
@@ -482,7 +484,7 @@ apply_inheritance_pattern_pipeline = [
                     "then": "$authors",
                     "else": {
                         "$cond": {
-                            "if":   {"$isArray": ["$author"]},
+                            "if":   {"$isArray": "$author"},
                             "then": "$author",
                             "else": [{"$ifNull": ["$author", "Unspecified"]}]
                         }
