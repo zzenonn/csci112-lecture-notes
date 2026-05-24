@@ -110,7 +110,7 @@ Before and after creating `{"year": 1}`:
 | `executionTimeMillis` | 17 ms | 1 ms |
 
 <div style="margin-top:0.5rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.86rem;">
-  Try this in your notebook — call <code>explain("executionStats")</code> before and after, and check <code>winningPlan.stage</code> and <code>executionStats</code> yourself.
+  Try this in your script — call <code>explain("executionStats")</code> before and after, and check <code>winningPlan.stage</code> and <code>executionStats</code> yourself.
 </div>
 
 ---
