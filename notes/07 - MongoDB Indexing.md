@@ -9,7 +9,12 @@ Department of Computer Science
 
 This note covers MongoDB indexing from first principles: how queries are executed, how to diagnose performance with `explain()`, what index types exist and when to use each, how to design indexes that complement the data modeling patterns from Module 08, and how to manage indexes safely in production.
 
-All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM. We reuse the `books` and `customers` collections introduced in earlier modules.
+All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM. We reuse the `books` and `customers` collections built up across Modules 04–08a:
+
+- **`books`** — the bookstore collection first created in [notes/8a](8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). By the time you reach this module it contains documents with fields like `title`, `price`, `product_type` (`"book"`, `"ebook"`, `"audiobook"`), `authors` (array), and a `rating` subdocument.
+- **`customers`** — an e-commerce customer collection introduced in [notes/8c](8c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md) (Reference / Extended Reference Pattern). Documents have `name`, `street`, `city`, `country`, and optionally `schema_version`.
+
+If you are starting fresh, run the setup scripts in notes/8a and notes/8b first, or insert a few sample documents manually before running the index examples below.
 
 ---
 
@@ -127,34 +132,52 @@ A compound index covers multiple fields. MongoDB can use it for queries that fil
 
 The **ESR rule** gives the optimal field order:
 
-1. **E**quality fields first — fields tested with `==` narrow the result set the most
-2. **S**ort fields second — allows MongoDB to return results in order without a separate sort step
+1. **E**quality fields first — fields tested with `==`
+2. **S**ort fields second — fields used in `sort()`
 3. **R**ange fields last — fields tested with `$gt`, `$lt`, `$in`, `$regex`
+
+#### Why this order — the mechanical explanation
+
+A B-tree index stores keys in sorted order. To understand ESR, picture walking through that sorted list:
+
+**Equality first:** An equality predicate (`product_type == "ebook"`) jumps the B-tree walk directly to the matching key range. All qualifying documents are grouped together as a contiguous block. Putting equality fields first means the entire subsequent walk is confined to that small block — every step after it is already pre-filtered.
+
+**Sort second:** Once the walk is confined to the equality block, the remaining keys inside that block are still in sorted B-tree order. If the sort field is next in the index, MongoDB can read the results directly in the correct order — no in-memory sort step needed. This is called a *"covered sort"* or *"index-provided sort"*.
+
+**Range last:** A range predicate (`price > 5`) matches a contiguous stretch of keys, but that stretch can span the entire remaining index if it comes before the sort field. If range came before sort, the matching keys would be scattered across many sub-ranges — MongoDB could not guarantee they are in sort order, so it would have to collect all matches first and then sort them in memory. Putting range last avoids this: by the time MongoDB hits the range condition, equality has already narrowed the result set, and the sort order has already been established.
+
+**Summary of what goes wrong when you violate ESR:**
+
+| Violation | Consequence |
+|-----------|-------------|
+| Range before Sort | In-memory sort required — loses the index-provided sort benefit |
+| Range before Equality | Scans a large portion of the index before narrowing by equality |
+| Sort before Equality | Index walk covers too many keys before reaching the equality block |
 
 ```python
 # Query pattern: product_type == "ebook", sorted by price, price > 5
-# ESR order: product_type (E), price (S+R)
+# ESR order: product_type (E), price (S+R) — price serves as both sort and range
 books.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
 
-# Confirm the plan uses IXSCAN
+# Confirm the plan uses IXSCAN with an index-provided sort (no SORT stage)
 result = books.find(
     {"product_type": "ebook", "price": {"$gt": 5}},
     sort=[("price", ASCENDING)]
 ).explain("executionStats")
 
 print(result["queryPlanner"]["winningPlan"]["inputStage"]["stage"])
-# → IXSCAN
+# → IXSCAN  (no separate SORT stage above it)
 ```
 
-**Why ESR matters:** if you put the range field first, MongoDB cannot use the index for the sort — it will IXSCAN for the range but then do an in-memory sort, which is slower and uses more memory.
+#### Index prefix rule
 
-A compound index `(a, b, c)` supports these query prefixes:
-- filter on `a`
-- filter on `a` and `b`
-- filter on `a`, `b`, and `c`
-- sort on `a` alone (if no filter, or equality filter on `a`)
+A compound index `(a, b, c)` is usable for queries that filter or sort on a **left-prefix** of the fields:
+- filter on `a` ✓
+- filter on `a` and `b` ✓
+- filter on `a`, `b`, and `c` ✓
+- sort on `a` (with equality filter on `a`) ✓
 
-It does **not** support queries that start with `b` or `c` alone.
+It does **not** support queries that start with `b` or `c` alone — MongoDB cannot use the index efficiently if it must skip the leading field.
 
 ### Multikey Index
 
