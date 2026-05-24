@@ -169,7 +169,7 @@ orders.insert_one({
 </div>
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md">notes/7c — Reference Pattern</a>
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md">notes/8c — Reference Pattern</a>
 </div>
 
 ---
@@ -275,7 +275,7 @@ def get_contacts(customer):
 </div>
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md">notes/7d — Schema Versioning</a>
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md">notes/8d — Schema Versioning</a>
 </div>
 
 ---
@@ -360,7 +360,7 @@ db["books"].aggregate([
 ```
 
 <div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Full pipelines for all three collections: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md">notes/7e — Single Collection</a>
+  Full pipelines for all three collections: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md">notes/8e — Single Collection</a>
 </div>
 
 ---
@@ -405,7 +405,7 @@ list(books_catalog.find({ "relatedTo": 34538756 }))
 </div>
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.83rem;">
-  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md">notes/7e — Single Collection</a>
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md">notes/8e — Single Collection</a>
 </div>
 
 ---
@@ -451,6 +451,6 @@ list(books_catalog.find({ "relatedTo": 34538756 }))
 
 See the matching notes for full code listings, sample documents, and command output:
 
-- [notes/7c — MongoDB Data Modeling: Reference Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)
-- [notes/7d — MongoDB Data Modeling: Schema Versioning Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md)
-- [notes/7e — MongoDB Data Modeling: Single Collection Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)
+- [notes/8c — MongoDB Data Modeling: Reference Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md)
+- [notes/8d — MongoDB Data Modeling: Schema Versioning Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8d%20-%20MongoDB%20Data%20Modeling%20Schema%20Versioning.md)
+- [notes/8e — MongoDB Data Modeling: Single Collection Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8e%20-%20MongoDB%20Data%20Modeling%20Single%20Collection.md)

@@ -1,5 +1,5 @@
 {
-  "name": "csci112-07a-modeling-patterns-1",
+  "name": "csci112-08a-modeling-patterns-1",
   "type": "module",
   "scripts": {
     "build": "slidev build",

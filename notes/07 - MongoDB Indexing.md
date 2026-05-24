@@ -9,12 +9,43 @@ Department of Computer Science
 
 This note covers MongoDB indexing from first principles: how queries are executed, how to diagnose performance with `explain()`, what index types exist and when to use each, how to design indexes that complement the data modeling patterns from Module 08, and how to manage indexes safely in production.
 
-All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM. We reuse the `books` and `customers` collections built up across Modules 04–08a:
+All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM, against the **`labs.movies`** collection — the same 44,488-document dataset used in Modules 04 and 05. Using a real, large collection makes the performance difference between COLLSCAN and IXSCAN concrete and measurable.
 
-- **`books`** — the bookstore collection first created in [notes/8a](8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). By the time you reach this module it contains documents with fields like `title`, `price`, `product_type` (`"book"`, `"ebook"`, `"audiobook"`), `authors` (array), and a `rating` subdocument.
-- **`customers`** — an e-commerce customer collection introduced in [notes/8c](8c%20-%20MongoDB%20Data%20Modeling%20Reference%20Pattern.md) (Reference / Extended Reference Pattern). Documents have `name`, `street`, `city`, `country`, and optionally `schema_version`.
+### The `labs.movies` collection
 
-If you are starting fresh, run the setup scripts in notes/8a and notes/8b first, or insert a few sample documents manually before running the index examples below.
+Each document looks like this:
+
+```json
+{
+  "_id": ObjectId("573a1390f29313caabcd421c"),
+  "title": "A Turn of the Century Illusionist",
+  "year": 1899,
+  "runtime": 1,
+  "cast": ["Georges Méliès"],
+  "plot": "A short silent film ...",
+  "type": "movie",
+  "directors": ["Georges Méliès"],
+  "imdb": { "rating": 6.6, "votes": 580, "id": 246 },
+  "countries": ["France"],
+  "genres": ["Short"],
+  "tomatoes": {
+    "viewer": { "rating": 3.8, "numReviews": 32 },
+    "lastUpdated": ISODate("2015-08-20T18:46:44.000Z")
+  }
+}
+```
+
+Key fields for indexing demos:
+
+| Field | Type | Cardinality | Notes |
+|-------|------|-------------|-------|
+| `year` | integer | high (~130 distinct years) | equality and range queries |
+| `title` | string | very high (nearly unique) | single-field, covered queries |
+| `genres` | array | moderate (~28 genres) | multikey index |
+| `cast` | array | very high | multikey index |
+| `imdb.rating` | float | moderate (0–10) | compound ESR, partial index |
+| `type` | string | **very low** (3 values) | cardinality demo |
+| `tomatoes.lastUpdated` | Date | high | TTL index |
 
 ---
 
@@ -25,10 +56,9 @@ from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 
 VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
 
-client    = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
-db        = client["bookstore"]
-books     = db["books"]
-customers = db["customers"]
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+db     = client["labs"]
+movies = db["movies"]
 ```
 
 ---
@@ -37,67 +67,100 @@ customers = db["customers"]
 
 ### COLLSCAN vs IXSCAN
 
-When MongoDB processes a query it picks a **query plan**. The two most important plan stages are:
+When MongoDB processes a query it selects a **query plan**. The two most important plan stages are:
 
-- **COLLSCAN** — collection scan: reads every document in the collection and checks each against the filter. Cost is O(N) where N is collection size.
-- **IXSCAN** — index scan: walks the B-tree index to find only the matching keys. Cost is O(log N + K) where K is the number of matching documents.
+- **COLLSCAN** — collection scan: reads every document in the collection and checks each one against the filter. Cost is O(N) where N is the number of documents.
+- **IXSCAN** — index scan: walks the B-tree index to find only the matching keys, then fetches those documents. Cost is O(log N + K) where K is the number of matching documents.
 
-For large collections, the difference is dramatic. A collection with 10 million documents and no index on the filter field means 10 million document reads — even if only one document matches.
+For 44,488 movies this is the difference between reading 44,488 documents and reading 550.
 
 ### `explain()` in PyMongo
 
 ```python
-result = books.find({"product_type": "ebook"}).explain("executionStats")
-
 import pprint
+
+result = movies.find({"year": 1994}).explain("executionStats")
 pprint.pprint(result)
 ```
 
-The output has two main sections:
+The two sections you care about:
 
 **`queryPlanner.winningPlan`** — the plan MongoDB chose:
 
-```json
-{
+```
+"winningPlan": {
   "stage": "COLLSCAN",
-  "filter": { "product_type": { "$eq": "ebook" } }
+  "filter": { "year": { "$eq": 1994 } }
 }
 ```
 
-After adding an index it becomes:
+**`executionStats`** — what actually happened:
 
-```json
-{
+```
+"executionStats": {
+  "nReturned": 550,
+  "totalDocsExamined": 44488,
+  "totalKeysExamined": 0,
+  "executionTimeMillis": 17
+}
+```
+
+Key ratio: `nReturned / totalDocsExamined`. Here it is `550 / 44488 = 0.012` — only 1.2% of scanned documents matched. The other 98.8% were wasted work.
+
+After creating an index the plan changes:
+
+```
+"winningPlan": {
   "stage": "FETCH",
   "inputStage": {
     "stage": "IXSCAN",
-    "keyPattern": { "product_type": 1 },
-    "indexName": "product_type_1"
+    "indexName": "idx_year",
+    "keyPattern": { "year": 1 }
   }
 }
 ```
 
-**`executionStats`** — what actually happened at runtime:
-
-```json
-{
-  "nReturned": 2,
-  "totalDocsExamined": 10000,
-  "totalKeysExamined": 2,
-  "executionTimeMillis": 45
+```
+"executionStats": {
+  "nReturned": 550,
+  "totalDocsExamined": 550,
+  "totalKeysExamined": 550,
+  "executionTimeMillis": 1
 }
 ```
 
-Key ratio to watch: `nReturned / totalDocsExamined`. A value close to 1.0 means the index is highly selective. A value close to 0.0 means most scanned documents were discarded — a sign of a missing or poorly designed index.
+The ratio is now `550 / 550 = 1.0` — every document examined was returned. Time dropped from **17 ms to 1 ms**.
+
+### Before / After Summary
+
+| Metric | No index (COLLSCAN) | With index (IXSCAN) |
+|--------|--------------------:|--------------------:|
+| `nReturned` | 550 | 550 |
+| `totalDocsExamined` | 44,488 | 550 |
+| `totalKeysExamined` | 0 | 550 |
+| `executionTimeMillis` | 17 ms | 1 ms |
+| Efficiency ratio | 1.2% | 100% |
 
 ### Index Cardinality and Selectivity
 
-**Cardinality** is the number of distinct values a field has across the collection.
+**Cardinality** is the number of distinct values a field has. **Selectivity** is what fraction of documents a query eliminates.
 
-- **High cardinality** (e.g., `email`, `_id`, `order_number`): each index entry points to very few documents. Queries are fast and selective.
-- **Low cardinality** (e.g., `status: "active"/"inactive"`, `is_deleted: true/false`): many documents share each index entry. The optimizer may choose COLLSCAN over IXSCAN because the index saves little work.
+The `type` field in `labs.movies` has only three values: `"movie"`, `"series"`, `"N/A"`. An index on `type` is nearly useless for `{type: "movie"}` — 99% of documents match, so the index saves almost no work:
 
-Rule of thumb: an index is most useful when the matching documents are less than ~5% of the collection.
+```
+# Low cardinality: type has 3 values, "movie" matches 44,075 of 44,488 docs
+"stage": "FETCH",
+"inputStage": "IXSCAN",
+"nReturned": 44075,
+"totalDocsExamined": 44075,
+"executionTimeMillis": 27
+```
+
+MongoDB used the index but still examined 44,075 documents — nearly a full scan. The optimizer may skip such an index entirely on a different query.
+
+Contrast with `year` (high cardinality, ~130 distinct values): a query for one year returns ~550 of 44,488 documents — a selectivity of 1.2%, making the index highly effective.
+
+**Rule of thumb:** an index is most beneficial when the query matches fewer than ~5% of the collection.
 
 ---
 
@@ -106,213 +169,259 @@ Rule of thumb: an index is most useful when the matching documents are less than
 ### Single-Field Index
 
 ```python
-# Ascending index on title
-books.create_index("title")
+# Ascending on year
+movies.create_index("year", name="idx_year")
 
-# Descending index on price (useful for "sort by most expensive")
-books.create_index([("price", DESCENDING)])
+# Descending on imdb.rating (dot notation for nested field)
+movies.create_index([("imdb.rating", DESCENDING)], name="idx_rating_desc")
 
-# Unique index — rejects duplicate values
-db["users"].create_index("email", unique=True)
+# Unique on title (will error if duplicates exist — movies does have some)
+# db["users"].create_index("email", unique=True)
 
-# Name the index explicitly for easier management
-books.create_index("title", name="idx_title_asc")
+# List all indexes
+for idx in movies.list_indexes():
+    print(idx["name"], idx["key"])
 ```
 
-List all indexes on a collection:
+**explain() output after creating `idx_year`:**
 
-```python
-for idx in books.list_indexes():
-    print(idx)
+```
+winningPlan:
+  stage: FETCH
+  inputStage:
+    stage: IXSCAN
+    indexName: idx_year
+
+executionStats:
+  nReturned:          550
+  totalDocsExamined:  550
+  totalKeysExamined:  550
+  executionTimeMillis: 1
 ```
 
 ### Compound Index and the ESR Rule
 
-A compound index covers multiple fields. MongoDB can use it for queries that filter or sort on a **prefix** of the index fields.
+A compound index covers multiple fields. MongoDB can use it for queries that filter or sort on a **left prefix** of those fields.
 
 The **ESR rule** gives the optimal field order:
 
-1. **E**quality fields first — fields tested with `==`
+1. **E**quality fields first — `==` comparisons
 2. **S**ort fields second — fields used in `sort()`
-3. **R**ange fields last — fields tested with `$gt`, `$lt`, `$in`, `$regex`
+3. **R**ange fields last — `$gt`, `$lt`, `$in`, `$regex`
 
 #### Why this order — the mechanical explanation
 
-A B-tree index stores keys in sorted order. To understand ESR, picture walking through that sorted list:
+A B-tree stores keys in sorted order. To understand ESR, picture walking that sorted list:
 
-**Equality first:** An equality predicate (`product_type == "ebook"`) jumps the B-tree walk directly to the matching key range. All qualifying documents are grouped together as a contiguous block. Putting equality fields first means the entire subsequent walk is confined to that small block — every step after it is already pre-filtered.
+**Equality first:** An equality predicate (`genres == "Action"`) jumps the B-tree walk to a contiguous block of matching keys. All qualifying entries are adjacent, so every step after is confined to that small block — eliminating the rest of the collection instantly.
 
-**Sort second:** Once the walk is confined to the equality block, the remaining keys inside that block are still in sorted B-tree order. If the sort field is next in the index, MongoDB can read the results directly in the correct order — no in-memory sort step needed. This is called a *"covered sort"* or *"index-provided sort"*.
+**Sort second:** Within the equality block the keys are still in B-tree order. If the sort field is next in the index, MongoDB reads results in the correct order directly — no in-memory sort step. This is called an *index-provided sort*.
 
-**Range last:** A range predicate (`price > 5`) matches a contiguous stretch of keys, but that stretch can span the entire remaining index if it comes before the sort field. If range came before sort, the matching keys would be scattered across many sub-ranges — MongoDB could not guarantee they are in sort order, so it would have to collect all matches first and then sort them in memory. Putting range last avoids this: by the time MongoDB hits the range condition, equality has already narrowed the result set, and the sort order has already been established.
+**Range last:** A range predicate (`imdb.rating > 7`) matches a contiguous stretch of keys. If it came before the sort field, the matches would be spread across many sub-ranges — MongoDB could not guarantee sort order and would have to collect all matches then sort them in memory (a `SORT` stage in the plan). Putting range last avoids this: equality has already narrowed the set and sort order has been established before the range filter is applied.
 
-**Summary of what goes wrong when you violate ESR:**
+**What happens when you violate ESR:**
 
 | Violation | Consequence |
 |-----------|-------------|
-| Range before Sort | In-memory sort required — loses the index-provided sort benefit |
-| Range before Equality | Scans a large portion of the index before narrowing by equality |
-| Sort before Equality | Index walk covers too many keys before reaching the equality block |
+| Range before Sort | In-memory `SORT` stage required |
+| Range before Equality | Scans much more of the index |
+| Sort before Equality | Index walk covers too many keys |
+
+#### Demo: genres (E) + imdb.rating (S + R)
+
+Query: all Action movies rated above 7, sorted by rating descending.
+
+**Before index (COLLSCAN + in-memory SORT):**
+
+```
+winningPlan:
+  stage: SORT              ← in-memory sort required
+  inputStage: COLLSCAN
+
+executionStats:
+  nReturned:          1071
+  totalDocsExamined:  44488
+  executionTimeMillis: 24
+```
 
 ```python
-# Query pattern: product_type == "ebook", sorted by price, price > 5
-# ESR order: product_type (E), price (S+R) — price serves as both sort and range
-books.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
-
-# Confirm the plan uses IXSCAN with an index-provided sort (no SORT stage)
-result = books.find(
-    {"product_type": "ebook", "price": {"$gt": 5}},
-    sort=[("price", ASCENDING)]
-).explain("executionStats")
-
-print(result["queryPlanner"]["winningPlan"]["inputStage"]["stage"])
-# → IXSCAN  (no separate SORT stage above it)
+movies.create_index(
+    [("genres", ASCENDING), ("imdb.rating", DESCENDING)],
+    name="idx_genres_rating_esr"
+)
 ```
+
+**After ESR compound index (FETCH ← IXSCAN, no SORT):**
+
+```
+winningPlan:
+  stage: FETCH
+  inputStage:
+    stage: IXSCAN
+    indexName: idx_genres_rating_esr
+    isMultiKey: true        ← genres is an array field
+
+executionStats:
+  nReturned:          1071
+  totalDocsExamined:  1071
+  totalKeysExamined:  1071
+  executionTimeMillis: 2
+```
+
+The `SORT` stage is gone — results come out of the index already in order. Time dropped from **24 ms to 2 ms**.
 
 #### Index prefix rule
 
-A compound index `(a, b, c)` is usable for queries that filter or sort on a **left-prefix** of the fields:
+Compound index `(a, b, c)` supports queries on left prefixes:
 - filter on `a` ✓
 - filter on `a` and `b` ✓
-- filter on `a`, `b`, and `c` ✓
-- sort on `a` (with equality filter on `a`) ✓
-
-It does **not** support queries that start with `b` or `c` alone — MongoDB cannot use the index efficiently if it must skip the leading field.
+- sort on `a` (with equality on `a`) ✓
+- filter starting at `b` or `c` alone ✗
 
 ### Multikey Index
 
-When you index an array field, MongoDB creates one index entry per array element — this is called a **multikey index**. It works automatically; you don't need a special option.
+When you index an array field, MongoDB creates one index entry per array element — this is a **multikey index**. It activates automatically; no special option needed.
 
 ```python
-# books.authors is an array: ["Alice Steinberg", "Bob Lim"]
-books.create_index("authors")
+movies.create_index("cast", name="idx_cast")
 
-# Both of these now use IXSCAN:
-books.find({"authors": "Alice Steinberg"})
-books.find({"authors": {"$in": ["Alice Steinberg", "Bob Lim"]}})
+# Now this uses IXSCAN:
+movies.find({"cast": "Tom Hanks"})
 ```
 
-**Compound multikey constraint:** only one field in a compound index may be an array. Indexing two array fields would require indexing the cartesian product, which MongoDB rejects.
+**explain() output:**
+
+```
+winningPlan:
+  stage: FETCH
+  inputStage:
+    stage: IXSCAN
+    indexName: idx_cast
+    isMultiKey: true     ← confirms array field
+
+executionStats:
+  nReturned:          50
+  totalDocsExamined:  50
+  totalKeysExamined:  50
+  executionTimeMillis: 1
+```
+
+**Compound multikey constraint:** only one array field per compound index. MongoDB cannot index the cartesian product of two arrays:
 
 ```python
-# OK — authors is array, price is scalar
-books.create_index([("authors", ASCENDING), ("price", ASCENDING)])
+# OK — cast is array, year is scalar
+movies.create_index([("cast", ASCENDING), ("year", ASCENDING)])
 
-# ERROR — both are arrays: MongoDB raises OperationFailure
-books.create_index([("authors", ASCENDING), ("tags", ASCENDING)])
+# ERROR — both genres and cast are arrays
+movies.create_index([("genres", ASCENDING), ("cast", ASCENDING)])
+# → OperationFailure: cannot index parallel arrays
 ```
-
-### Unique Index
-
-```python
-db["users"].create_index("email", unique=True)
-
-# Compound unique — the *combination* must be unique, not each field individually
-books.create_index([("isbn", ASCENDING), ("edition", ASCENDING)], unique=True)
-```
-
-Inserting a document with a duplicate value raises `DuplicateKeyError`.
 
 ### Partial Index
 
-Indexes only documents that match a filter expression. Smaller than a full index, lower write overhead:
+Indexes only documents matching a filter expression — smaller than a full index, lower write overhead.
 
 ```python
-# Only index books that are currently in stock
-books.create_index(
-    "price",
-    partialFilterExpression={"in_stock": True},
-    name="idx_price_in_stock"
+# Only index highly-rated movies (imdb.rating >= 8)
+# 2,284 of 44,488 docs qualify — index is ~5% the size of a full index
+movies.create_index(
+    [("imdb.rating", DESCENDING)],
+    partialFilterExpression={"imdb.rating": {"$gte": 8}},
+    name="idx_rating_partial"
 )
-
-# This query uses the partial index:
-books.find({"in_stock": True, "price": {"$lt": 20}})
-
-# This query does NOT (in_stock: False docs are not indexed):
-books.find({"in_stock": False, "price": {"$lt": 20}})
 ```
 
-For a query to use a partial index, the query filter must **guarantee** that the partial filter expression is true — otherwise MongoDB falls back to COLLSCAN.
+**explain() output — query on highly-rated movies:**
+
+```
+winningPlan:
+  stage: FETCH
+  inputStage:
+    stage: IXSCAN
+    indexName: idx_rating_partial
+
+executionStats:
+  nReturned:          2284
+  totalDocsExamined:  2284
+  totalKeysExamined:  2284
+  executionTimeMillis: 3
+```
+
+For the query `{"imdb.rating": {"$gte": 8}}` the partial index is used. For `{"imdb.rating": {"$gte": 6}}` MongoDB falls back to COLLSCAN — the query filter does not guarantee the partial expression is true, so the index cannot be trusted to contain all matches.
 
 ### Sparse Index
 
-A sparse index only includes documents that have the indexed field. Documents without the field are skipped entirely.
+Only indexes documents where the field exists. Useful for optional fields:
 
 ```python
-# Old customer documents have no schema_version field
-# A sparse index skips them, keeping the index small
-customers.create_index("schema_version", sparse=True)
+# Only index movies that have a runtime field
+movies.create_index("runtime", sparse=True, name="idx_runtime_sparse")
 ```
 
-Sparse indexes are useful for optional fields. However, a sparse index on a field that exists in most documents provides little benefit — use a partial index instead for more control.
+For most schemas, a **partial index is more expressive** than sparse — you can specify exactly which documents to include rather than relying on field existence alone.
 
 ### TTL Index
 
-Automatically expires and deletes documents after a specified duration:
+Automatically deletes documents after a time-to-live period. The indexed field must be a BSON `Date`:
 
 ```python
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
-# Create a TTL index — expire after 3600 seconds (1 hour)
+# Create a sessions collection with automatic 1-hour expiry
 db["sessions"].create_index(
     "created_at",
-    expireAfterSeconds=3600
+    expireAfterSeconds=3600,
+    name="idx_sessions_ttl"
 )
 
-# Insert a session — it will be deleted ~1 hour after created_at
 db["sessions"].insert_one({
-    "user_id": "u_001",
+    "user": "mjlsaavedra",
     "token": "abc123",
     "created_at": datetime.now(timezone.utc)
 })
+# This document is automatically deleted ~1 hour after created_at
 ```
 
-**Constraints:**
-- The indexed field must be a BSON `Date` type (Python `datetime`). If it is missing or not a date, the document is never expired.
-- TTL indexes are single-field only — no compound TTL indexes.
-- A background thread checks for and removes expired documents every 60 seconds. Expiration is approximate, not exact.
+The `tomatoes.lastUpdated` field in `labs.movies` is a Date — it could serve as a TTL field in a real streaming-updates scenario.
 
-**Common use cases:** session tokens, OTP codes, shopping cart items, event logs with a retention policy.
+**Constraints:** single-field only; cleanup thread runs every ~60 seconds so expiration is approximate.
 
 ### Text Index
 
-Full-text search across one or more string fields:
+Full-text search across string fields:
 
 ```python
-# Create a text index on title and description
-books.create_index([("title", TEXT), ("description", TEXT)])
+movies.create_index(
+    [("title", TEXT), ("plot", TEXT)],
+    name="idx_text_title_plot"
+)
 
-# Search — returns documents containing both words (AND by default)
-books.find({"$text": {"$search": "definitive guide"}})
+# Search for movies about space adventure
+movies.find({"$text": {"$search": "space adventure"}})
+```
 
-# Phrase search
-books.find({"$text": {"$search": "\"definitive guide\""}})
+**explain() output:**
 
-# Exclude a word
-books.find({"$text": {"$search": "mongodb -javascript"}})
+```
+winningPlan:
+  stage: TEXT_MATCH
+  inputStage: FETCH
 
+executionStats:
+  nReturned:          921
+  totalDocsExamined:  921
+  executionTimeMillis: 2
+```
+
+```python
 # Sort by relevance score
-books.find(
-    {"$text": {"$search": "mongodb guide"}},
-    {"score": {"$meta": "textScore"}}
+movies.find(
+    {"$text": {"$search": "space adventure"}},
+    {"score": {"$meta": "textScore"}, "title": 1}
 ).sort([("score", {"$meta": "textScore"})])
 ```
 
-**Constraints:** only one text index per collection. It can cover multiple fields.
-
-### Wildcard Index
-
-Indexes all fields in a document (or a subtree) — useful when field names are dynamic and unpredictable:
-
-```python
-# Index every field in the document
-db["events"].create_index({"$**": 1})
-
-# Index only fields nested under metadata
-db["events"].create_index({"metadata.$**": 1})
-```
-
-Wildcard indexes are large and impose significant write overhead. Use them only when the schema is genuinely dynamic (e.g., user-defined attributes, polymorphic event payloads). For known field names, a compound index is always preferable.
+**Constraint:** only one text index per collection; it can span multiple fields.
 
 ---
 
@@ -320,40 +429,34 @@ Wildcard indexes are large and impose significant write overhead. Use them only 
 
 ### Indexes for the Patterns from Module 08
 
-**Inheritance Pattern** (`product_type` discriminator):
+**Inheritance Pattern** (`product_type` discriminator on `books`):
 
 ```python
-# Single-field index — most reads filter by product type
+# Queries almost always filter by product_type first
 books.create_index("product_type")
 
-# Combined with sort — books by type sorted by price
+# Combined with sort — books by type sorted by price (ESR)
 books.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
 ```
 
-**Schema Versioning Pattern** (`schema_version` field):
+**Schema Versioning Pattern** (`schema_version` — optional field):
 
 ```python
-# Sparse — old documents without schema_version are skipped
+# Sparse: old documents without schema_version are excluded from the index
 customers.create_index("schema_version", sparse=True)
 ```
 
 **Single Collection Pattern** (`docType` + `relatedTo`):
 
 ```python
-# Both fields are equality — either order works, but relatedTo first
-# because the common query is "all docs related to book X"
+# Compound ESR: both are equality filters, relatedTo first
+# (the common query is "all docs related to product X")
 db["books_catalog"].create_index(
     [("relatedTo", ASCENDING), ("docType", ASCENDING)]
 )
-
-# Fetch the book and all its reviews in one query:
-db["books_catalog"].find({"relatedTo": 34538756})
-
-# Filter to just reviews:
-db["books_catalog"].find({"relatedTo": 34538756, "docType": "review"})
 ```
 
-**Computed Pattern** (sorting by cached average rating):
+**Computed Pattern** (sort by cached `average_rating`):
 
 ```python
 # Descending — "top rated books" query
@@ -362,56 +465,58 @@ books.create_index([("rating.average_rating", DESCENDING)])
 
 ### Covered Queries
 
-A covered query is served entirely from the index — MongoDB never reads the document itself. This is the fastest possible read path.
+A covered query is served entirely from the index — MongoDB never fetches the document. `totalDocsExamined` will be **0**.
 
 ```python
-# Index: (product_type, title)
-books.create_index([("product_type", ASCENDING), ("title", ASCENDING)])
-
-# Projection includes ONLY indexed fields (no _id = exclude it)
-cursor = books.find(
-    {"product_type": "ebook"},
-    {"_id": 0, "title": 1}
+movies.create_index(
+    [("genres", ASCENDING), ("title", ASCENDING)],
+    name="idx_genres_title_covered"
 )
 
-# Check the plan — should show PROJECTION_COVERED with no FETCH stage
-result = books.find(
-    {"product_type": "ebook"},
+# Projection includes only indexed fields, _id excluded
+movies.find(
+    {"genres": "Action"},
     {"_id": 0, "title": 1}
 ).explain("executionStats")
-
-stages = []
-plan = result["queryPlanner"]["winningPlan"]
-while plan:
-    stages.append(plan["stage"])
-    plan = plan.get("inputStage")
-print(stages)
-# → ['PROJECTION_COVERED', 'IXSCAN']  — no FETCH
 ```
+
+**explain() output:**
+
+```
+winningPlan:
+  stage: PROJECTION_COVERED
+  inputStage:
+    stage: IXSCAN
+    indexName: idx_genres_title_covered
+
+executionStats:
+  nReturned:          5655
+  totalDocsExamined:  0       ← zero document reads
+  totalKeysExamined:  5655
+  executionTimeMillis: 3
+```
+
+`totalDocsExamined: 0` — no documents were read at all. The entire result was served from the index.
 
 For a query to be covered:
 1. All filter fields must be in the index.
-2. All projection fields must be in the index.
-3. `_id` must be excluded from the projection (or included in the index).
+2. All projected fields must be in the index.
+3. `_id` must be excluded (or included in the index).
 
 ### Index Intersection vs Compound Index
 
-MongoDB can merge two single-field index results in memory (index intersection), but a purpose-built compound index is almost always faster:
+MongoDB can sometimes merge two single-field indexes in memory, but a compound index is almost always faster:
 
 ```python
-# Scenario: frequently query {product_type: "ebook", price: {$lt: 20}}
+# Option A: two separate indexes (index intersection — implicit, unpredictable)
+movies.create_index("genres")
+movies.create_index("year")
 
-# Option A: two separate indexes (index intersection)
-books.create_index("product_type")
-books.create_index("price")
-# MongoDB may or may not intersect — and the merge has CPU/memory cost
-
-# Option B: one compound index (preferred)
-books.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
-# Single B-tree walk, supports ESR sort, supports covered queries
+# Option B: one compound index (explicit, predictable, supports ESR)
+movies.create_index([("genres", ASCENDING), ("year", ASCENDING)])
 ```
 
-Use index intersection only when you cannot predict query combinations in advance. Otherwise design compound indexes explicitly.
+Prefer compound indexes for any query pattern that regularly filters on multiple fields together.
 
 ---
 
@@ -420,78 +525,40 @@ Use index intersection only when you cannot predict query combinations in advanc
 ### Checking Index Usage with `$indexStats`
 
 ```python
-for stat in books.aggregate([{"$indexStats": {}}]):
-    print(f"{stat['name']:30s}  ops={stat['accesses']['ops']}")
+for stat in movies.aggregate([{"$indexStats": {}}]):
+    print(f"{stat['name']:40s}  ops={stat['accesses']['ops']}")
 ```
 
-An index with `ops: 0` (or very low ops relative to others) is a candidate for removal.
+An index with `ops: 0` — or very low ops relative to others — is a candidate for removal.
 
 ### Hiding an Index Before Dropping
 
 ```python
-# Step 1 — hide: the index is invisible to the query planner but still maintained
-db.command("collMod", "books", index={"name": "old_index_name", "hidden": True})
+# Step 1 — hide: invisible to query planner but still maintained on writes
+db.command("collMod", "movies", index={"name": "idx_year", "hidden": True})
 
-# Monitor for several days — if no performance regression, proceed
-# Step 2 — drop
-books.drop_index("old_index_name")
+# Monitor for several days — check that query performance does not degrade
+# Step 2 — drop safely
+movies.drop_index("idx_year")
 
 # To unhide (rollback):
-db.command("collMod", "books", index={"name": "old_index_name", "hidden": False})
+db.command("collMod", "movies", index={"name": "idx_year", "hidden": False})
 ```
 
-`hideIndex` is available from MongoDB 4.4 onward. It is the safest way to decommission an index in production — you get a free rollback window.
+`hideIndex` is available from MongoDB 4.4. It gives you a free rollback window — the index can be re-exposed instantly if performance degrades after hiding.
 
-### Write Amplification Demo
+### Write Amplification
 
-```python
-import time
+Every write (insert, update, delete) must update all indexes on the collection:
 
-# Drop all non-default indexes
-for idx in books.list_indexes():
-    if idx["name"] != "_id_":
-        books.drop_index(idx["name"])
-
-# Measure inserts with NO extra indexes
-start = time.perf_counter()
-books.insert_many([{"title": f"book_{i}", "price": i} for i in range(10000)])
-t_no_index = time.perf_counter() - start
-books.delete_many({})
-
-# Add 5 indexes
-books.create_index("title")
-books.create_index("price")
-books.create_index([("title", ASCENDING), ("price", ASCENDING)])
-books.create_index("product_type")
-books.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
-
-# Measure inserts WITH 5 indexes
-start = time.perf_counter()
-books.insert_many([{"title": f"book_{i}", "price": i, "product_type": "book"} for i in range(10000)])
-t_with_index = time.perf_counter() - start
-
-print(f"No extra indexes:  {t_no_index:.2f}s")
-print(f"With 5 indexes:    {t_with_index:.2f}s")
-print(f"Write overhead:    {t_with_index / t_no_index:.1f}x")
+```
+1 document insert  →  1 write to collection
+                    +  1 write per index
 ```
 
-The overhead grows with the number of indexes and the size of the indexed fields. This is why the Approximation Pattern (reducing writes by ~90%) pairs well with heavily-indexed collections.
+A collection with 5 indexes means 6 write operations per insert. Measure this with `$indexStats` over time, and drop indexes that are never used.
 
-### Building Indexes on Large Collections
-
-Since MongoDB 4.2, all index builds are non-blocking by default. Monitor a build in progress:
-
-```python
-import pprint
-
-# Check active index builds
-ops = db.command("currentOp", {"$all": True})
-for op in ops["inprog"]:
-    if op.get("command", {}).get("createIndexes"):
-        pprint.pprint(op)
-```
-
-On a replica set, the primary builds first. Secondaries replicate the build operation and build the index independently, so they may lag briefly during the build. The index is not available for queries until the build completes on each node.
+This is why the **Approximation Pattern** (reducing writes by ~90%) pairs well with heavily-indexed collections.
 
 ---
 
@@ -501,19 +568,17 @@ On a replica set, the primary builds first. Secondaries replicate the build oper
 |------------|----------|---------------|
 | Single-field | Filter or sort on one field | Low cardinality may not help |
 | Compound (ESR) | Multi-field filter + sort | Field order must follow ESR |
-| Multikey | Querying inside array fields | Only one array field per compound index |
-| Unique | Enforce uniqueness constraint | DuplicateKeyError on insert |
-| Partial | Only a subset of documents qualify | Query must match filter expression |
-| Sparse | Field is optional in many docs | Use partial for more control |
+| Multikey | Querying inside array fields | One array field per compound index |
+| Partial | Only a subset of documents qualify | Query must imply the filter expression |
+| Sparse | Optional field in many documents | Prefer partial for more control |
 | TTL | Auto-expiring documents | ~60-second cleanup granularity |
 | Text | Full-text search on strings | One text index per collection |
-| Wildcard | Truly dynamic field names | Large, expensive writes |
 
 ---
 
 ## Additional Resources
 
-- [PyMongo `create_index` documentation](https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.create_index)
+- [PyMongo `create_index`](https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.create_index)
 - [MongoDB Index Types](https://www.mongodb.com/docs/manual/indexes/)
 - [MongoDB ESR Rule](https://www.mongodb.com/docs/manual/tutorial/equality-sort-range-rule/)
 - [MongoDB `explain()`](https://www.mongodb.com/docs/manual/reference/method/cursor.explain/)
@@ -523,119 +588,86 @@ On a replica set, the primary builds first. Secondaries replicate the build oper
 
 ## Full Example
 
-The script below exercises every concept in this note end-to-end. Run it against a populated `books` collection (see [notes/8a](8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md) for setup).
+Copy-paste this script after setting `VM_IP_ADDRESS`. It runs every demo in this note in sequence and prints before/after `explain()` summaries. All indexes are dropped at the end — the collection is left in its original state.
 
 ```python
-import time
 import pprint
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 
 VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
-db     = client["bookstore"]
-books  = db["books"]
+db     = client["labs"]
+movies = db["movies"]
 
-# ---------------------------------------------------------------------------
-# 1. explain() — before index
-# ---------------------------------------------------------------------------
-result = books.find({"product_type": "ebook"}).explain("executionStats")
-print("Before index — stage:", result["queryPlanner"]["winningPlan"]["stage"])
-print("  docsExamined:", result["executionStats"]["totalDocsExamined"])
-print("  nReturned:   ", result["executionStats"]["nReturned"])
+def explain_summary(label, cursor):
+    r = cursor.explain("executionStats")
+    plan = r["queryPlanner"]["winningPlan"]
+    stats = r["executionStats"]
+    inner = plan.get("inputStage", {})
+    print(f"\n{'─'*60}")
+    print(f"  {label}")
+    print(f"{'─'*60}")
+    print(f"  top stage      : {plan['stage']}")
+    if inner:
+        print(f"  input stage    : {inner.get('stage','—')}  (index: {inner.get('indexName','—')})")
+        print(f"  isMultiKey     : {inner.get('isMultiKey','—')}")
+    print(f"  nReturned      : {stats['nReturned']}")
+    print(f"  docsExamined   : {stats['totalDocsExamined']}")
+    print(f"  keysExamined   : {stats['totalKeysExamined']}")
+    print(f"  timeMillis     : {stats['executionTimeMillis']} ms")
 
-# ---------------------------------------------------------------------------
-# 2. Create a single-field index and re-explain
-# ---------------------------------------------------------------------------
-books.create_index("product_type", name="idx_product_type")
+# ── 1. Single-field ──────────────────────────────────────────────────────
+explain_summary("BEFORE index — year == 1994",
+    movies.find({"year": 1994}))
 
-result = books.find({"product_type": "ebook"}).explain("executionStats")
-plan = result["queryPlanner"]["winningPlan"]
-print("\nAfter index — stage:", plan.get("stage"), "→", plan.get("inputStage", {}).get("stage"))
-print("  docsExamined:", result["executionStats"]["totalDocsExamined"])
-print("  nReturned:   ", result["executionStats"]["nReturned"])
+movies.create_index("year", name="idx_year")
+explain_summary("AFTER  idx_year — year == 1994",
+    movies.find({"year": 1994}))
+movies.drop_index("idx_year")
 
-# ---------------------------------------------------------------------------
-# 3. Compound index (ESR) for filter + sort
-# ---------------------------------------------------------------------------
-books.create_index(
-    [("product_type", ASCENDING), ("price", ASCENDING)],
-    name="idx_type_price_esr"
+# ── 2. ESR compound ──────────────────────────────────────────────────────
+explain_summary("BEFORE compound — genres=Action, rating>7, sort rating desc",
+    movies.find({"genres": "Action", "imdb.rating": {"$gt": 7}}).sort("imdb.rating", DESCENDING))
+
+movies.create_index(
+    [("genres", ASCENDING), ("imdb.rating", DESCENDING)],
+    name="idx_genres_rating_esr"
 )
+explain_summary("AFTER  ESR compound",
+    movies.find({"genres": "Action", "imdb.rating": {"$gt": 7}}).sort("imdb.rating", DESCENDING))
+movies.drop_index("idx_genres_rating_esr")
 
-result = books.find(
-    {"product_type": "ebook", "price": {"$gt": 5}},
-    sort=[("price", ASCENDING)]
-).explain("executionStats")
+# ── 3. Multikey ──────────────────────────────────────────────────────────
+movies.create_index("cast", name="idx_cast")
+explain_summary("Multikey — cast: Tom Hanks",
+    movies.find({"cast": "Tom Hanks"}))
+movies.drop_index("idx_cast")
 
-plan = result["queryPlanner"]["winningPlan"]
-inner = plan.get("inputStage", {})
-print("\nESR compound — stages:", plan["stage"], "→", inner.get("stage"))
+# ── 4. Covered query ─────────────────────────────────────────────────────
+movies.create_index([("genres", ASCENDING), ("title", ASCENDING)], name="idx_genres_title")
+explain_summary("Covered query — genres=Action, project title only",
+    movies.find({"genres": "Action"}, {"_id": 0, "title": 1}))
+movies.drop_index("idx_genres_title")
 
-# ---------------------------------------------------------------------------
-# 4. Covered query
-# ---------------------------------------------------------------------------
-books.create_index(
-    [("product_type", ASCENDING), ("title", ASCENDING)],
-    name="idx_type_title_covered"
+# ── 5. Partial index ─────────────────────────────────────────────────────
+movies.create_index(
+    [("imdb.rating", DESCENDING)],
+    partialFilterExpression={"imdb.rating": {"$gte": 8}},
+    name="idx_rating_partial"
 )
+explain_summary("Partial index — imdb.rating >= 8",
+    movies.find({"imdb.rating": {"$gte": 8}}))
+movies.drop_index("idx_rating_partial")
 
-result = books.find(
-    {"product_type": "ebook"},
-    {"_id": 0, "title": 1}
-).explain("executionStats")
+# ── 6. Text index ────────────────────────────────────────────────────────
+movies.create_index([("title", TEXT), ("plot", TEXT)], name="idx_text")
+explain_summary("Text index — $search: space adventure",
+    movies.find({"$text": {"$search": "space adventure"}}))
+movies.drop_index("idx_text")
 
-stages = []
-node = result["queryPlanner"]["winningPlan"]
-while node:
-    stages.append(node["stage"])
-    node = node.get("inputStage")
-print("\nCovered query stages:", stages)
-# Expected: ['PROJECTION_COVERED', 'IXSCAN']
-
-# ---------------------------------------------------------------------------
-# 5. TTL index (on sessions collection)
-# ---------------------------------------------------------------------------
-from datetime import datetime, timezone
-
-db["sessions"].drop()
-db["sessions"].create_index("created_at", expireAfterSeconds=5)
-db["sessions"].insert_one({"token": "xyz", "created_at": datetime.now(timezone.utc)})
-print("\nSession inserted. Will expire in ~5s (cleanup runs every 60s).")
-
-# ---------------------------------------------------------------------------
-# 6. $indexStats — check usage
-# ---------------------------------------------------------------------------
-print("\nIndex usage stats:")
-for stat in books.aggregate([{"$indexStats": {}}]):
-    print(f"  {stat['name']:40s}  ops={stat['accesses']['ops']}")
-
-# ---------------------------------------------------------------------------
-# 7. Write amplification demo
-# ---------------------------------------------------------------------------
-# Drop extra indexes
-for idx in books.list_indexes():
-    if idx["name"] not in ("_id_",):
-        books.drop_index(idx["name"])
-
-start = time.perf_counter()
-books.insert_many([{"title": f"t_{i}", "price": i % 100} for i in range(5000)])
-t_bare = time.perf_counter() - start
-books.delete_many({"title": {"$regex": "^t_"}})
-
-# Add 4 indexes
-books.create_index("title")
-books.create_index("price")
-books.create_index([("title", ASCENDING), ("price", ASCENDING)])
-books.create_index("product_type")
-
-start = time.perf_counter()
-books.insert_many([{"title": f"t_{i}", "price": i % 100, "product_type": "book"} for i in range(5000)])
-t_indexed = time.perf_counter() - start
-books.delete_many({"title": {"$regex": "^t_"}})
-
-print(f"\nWrite amplification demo:")
-print(f"  No extra indexes:  {t_bare:.2f}s")
-print(f"  With 4 indexes:    {t_indexed:.2f}s")
-print(f"  Overhead factor:   {t_indexed / t_bare:.1f}x")
+# ── 7. $indexStats — confirm only _id_ remains ───────────────────────────
+print("\nIndexes after cleanup:")
+for stat in movies.aggregate([{"$indexStats": {}}]):
+    print(f"  {stat['name']}")
 ```

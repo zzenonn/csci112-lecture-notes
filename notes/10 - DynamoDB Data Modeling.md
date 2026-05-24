@@ -551,7 +551,7 @@ Multi-attribute keys eliminate all of these issues. You will still encounter the
    - The access patterns each key supports
    - Which entities appear in which GSIs (sparse indexing)
 
-6. Compare the DynamoDB single-table design with the MongoDB Single Collection Pattern from Module 7e. What are the trade-offs of each approach?
+6. Compare the DynamoDB single-table design with the MongoDB Single Collection Pattern from Module 8e. What are the trade-offs of each approach?
 
 7. Take the tournament example from the hierarchical data section and implement it in Python using boto3. Create the table, insert sample matches, and write queries at each level of the hierarchy.
 

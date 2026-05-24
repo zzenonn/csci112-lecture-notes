@@ -204,7 +204,7 @@ Use it when documents:
 </div>
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
-  Full document examples: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/7a — Inheritance Pattern</a>
+  Full document examples: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/8a — Inheritance Pattern</a>
 </div>
 
 ---
@@ -262,7 +262,7 @@ In practice, you rarely start with clean data. You inherit a collection where do
 </div>
 
 <div style="margin-top:0.8rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
-  Full sample documents and <code>insert_many</code> snippet: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-1-insert-sample-documents">notes/7a — Step 1</a>
+  Full sample documents and <code>insert_many</code> snippet: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-1-insert-sample-documents">notes/8a — Step 1</a>
 </div>
 
 ---
@@ -311,7 +311,7 @@ books.replace_one(
 ```
 
 <div style="margin-top:0.8rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.82rem;">
-  Repeat for each <code>_id</code>. Full version: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-a-manual-updates">notes/7a — Option A</a>
+  Repeat for each <code>_id</code>. Full version: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-a-manual-updates">notes/8a — Option A</a>
 </div>
 
 ---
@@ -370,7 +370,7 @@ books.aggregate([
 ```
 
 <div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.82rem;">
-  Full pipelines for all three types: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-b-aggregation-pipeline-automation">notes/7a — Option B</a>
+  Full pipelines for all three types: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#option-b-aggregation-pipeline-automation">notes/8a — Option B</a>
 </div>
 
 ---
@@ -390,7 +390,7 @@ books.find()                                   # all types together
 ```
 
 <div style="margin-top:1rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1rem; font-size:0.85rem;">
-  Expected output for all three documents: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-4-verify-the-updates">notes/7a — Verify</a>
+  Expected output for all three documents: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md#step-4-verify-the-updates">notes/8a — Verify</a>
 </div>
 
 ---
@@ -427,7 +427,7 @@ books.find()                                   # all types together
 - If a subtype's fields diverge so much that common queries rarely apply, consider **separate collections** instead
 
 <div style="margin-top:1.2rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.7rem 1rem; font-size:0.88rem;">
-  Full mongosh walkthrough: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/7a — Inheritance Pattern</a>
+  Full mongosh walkthrough: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md">notes/8a — Inheritance Pattern</a>
 </div>
 
 ---
@@ -553,7 +553,7 @@ Readers query `book_summary` directly — fast lookup, never a live aggregation.
 </div>
 
 <div style="margin-top:1.2rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.7rem 1rem; font-size:0.88rem;">
-  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md">notes/7b — Computed &amp; Approximation</a>
+  Full example: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md">notes/8b — Computed &amp; Approximation</a>
 </div>
 
 ---
@@ -709,5 +709,5 @@ print(books.find_one({ "_id": 2 }, { "rating": 1 }))
 
 See the matching notes for full code listings, sample documents, and command output:
 
-- [notes/7a — MongoDB Data Modeling: Inheritance Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md)
-- [notes/7b — MongoDB Data Modeling: Computed and Approximation Patterns](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md)
+- [notes/8a — MongoDB Data Modeling: Inheritance Pattern](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md)
+- [notes/8b — MongoDB Data Modeling: Computed and Approximation Patterns](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/8b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md)

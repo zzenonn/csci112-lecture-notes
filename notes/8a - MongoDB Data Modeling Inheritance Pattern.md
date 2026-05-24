@@ -546,4 +546,4 @@ for doc in books.find():
     print(doc)
 ```
 
-After running, every document carries a normalized `description`, an `authors` array, and a `product_type` discriminator (`book`, `ebook`, or `audiobook`) — ready to use with the Computed and Approximation patterns in [notes/7b](7b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md).
+After running, every document carries a normalized `description`, an `authors` array, and a `product_type` discriminator (`book`, `ebook`, or `audiobook`) — ready to use with the Computed and Approximation patterns in [notes/8b](8b%20-%20MongoDB%20Data%20Modeling%20Computed%20and%20Approximation%20Pattern.md).

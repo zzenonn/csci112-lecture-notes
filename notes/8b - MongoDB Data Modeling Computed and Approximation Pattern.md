@@ -9,7 +9,7 @@ Department of Computer Science
 
 This note introduces two important schema design patterns in MongoDB: the **Computed Pattern** and the **Approximation Pattern**. Both are used to optimize performance in read-heavy applications by reducing the cost of computation. These patterns are demonstrated using a bookstore application and are essential tools for designing scalable, efficient MongoDB schemas.
 
-All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM. We assume the `books` collection from `7a - MongoDB Data Modeling Inheritance Pattern.md` already exists.
+All examples use **PyMongo** running on your laptop, connecting to `mongod` on a VM. We assume the `books` collection from `8a - MongoDB Data Modeling Inheritance Pattern.md` already exists.
 
 ---
 
@@ -310,7 +310,7 @@ Both the Computed and Approximation Patterns are valuable tools for optimizing M
 
 ## Full Example
 
-The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `VM_IP_ADDRESS` constant. It assumes the `books` collection already exists from [notes/7a](7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). It defines `add_review` (Computed) and `add_review_approx` (Approximation), runs both end-to-end demos, then runs a roll-up into `book_summary`.
+The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `VM_IP_ADDRESS` constant. It assumes the `books` collection already exists from [notes/8a](8a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). It defines `add_review` (Computed) and `add_review_approx` (Approximation), runs both end-to-end demos, then runs a roll-up into `book_summary`.
 
 ```python
 import random

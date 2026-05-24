@@ -10,7 +10,7 @@
 - [Overview](#overview)
 - [Objectives](#objectives)
 - [Revisiting the Users-Orders-Items Design](#revisiting-the-users-orders-items-design)
-  - [What We Built in Module 09](#what-we-built-in-module-09)
+  - [What We Built in Module 10](#what-we-built-in-module-09)
   - [Problems with the Everything-Table Approach](#problems-with-the-everything-table-approach)
 - [Principle 1: Natural Keys Over Generic Identifiers](#principle-1-natural-keys-over-generic-identifiers)
 - [Principle 2: Item Collections](#principle-2-item-collections)
@@ -31,7 +31,7 @@
   - [Sparse GSIs](#sparse-gsis)
   - [Hierarchical Sort Keys](#hierarchical-sort-keys)
   - [Temporal Access Patterns](#temporal-access-patterns)
-- [Comparison: Module 09 vs Improved Design](#comparison-module-09-vs-improved-design)
+- [Comparison: Module 10 vs Improved Design](#comparison-module-09-vs-improved-design)
 - [Practice Exercises](#practice-exercises)
 - [Summary](#summary)
 - [Additional Resources](#additional-resources)
@@ -40,7 +40,7 @@
 
 ## Overview
 
-In Module 09, we built a single-table design that stores users, orders, and line items together using multi-attribute GSI keys. That design works and eliminates synthetic key concatenation, but it has limitations. In this module, we examine those limitations and learn **aggregate-oriented design patterns** that lead to cleaner, more maintainable, and more operationally sound DynamoDB models.
+In Module 10, we built a single-table design that stores users, orders, and line items together using multi-attribute GSI keys. That design works and eliminates synthetic key concatenation, but it has limitations. In this module, we examine those limitations and learn **aggregate-oriented design patterns** that lead to cleaner, more maintainable, and more operationally sound DynamoDB models.
 
 The central idea: **let your access patterns reveal natural aggregates, then design your tables around those aggregates** rather than forcing everything into one table.
 
@@ -59,9 +59,9 @@ The central idea: **let your access patterns reveal natural aggregates, then des
 
 ## Revisiting the Users-Orders-Items Design
 
-### What We Built in Module 09
+### What We Built in Module 10
 
-In Module 09, we stored three entity types in a single table:
+In Module 10, we stored three entity types in a single table:
 
 ```
 Base table: entity_type (PK) + entity_id (SK)
@@ -77,7 +77,7 @@ With two multi-attribute GSIs (user-index and order-index) for cross-entity quer
 
 ### Problems with the Everything-Table Approach
 
-While the Module 09 design works, it has significant drawbacks as the application grows:
+While the Module 10 design works, it has significant drawbacks as the application grows:
 
 **1. Generic, non-descriptive keys.** `entity_type` and `entity_id` don't communicate what the data represents. A new developer looking at the table has to understand the entire design before they can write a query. Compare `entity_type = 'ORDER' AND entity_id = 'abc123'` with `order_id = 'abc123'` -- the second is immediately clear.
 
@@ -219,7 +219,7 @@ Benefits of multiple tables:
 
 ## Redesigning Users-Orders-Items
 
-Let's apply these principles to redesign the Module 09 example.
+Let's apply these principles to redesign the Module 10 example.
 
 ### Step 1: Identify Access Patterns
 
@@ -457,9 +457,9 @@ Use ISO 8601 strings as sort keys for chronological ordering. Use numeric timest
 
 ---
 
-## Comparison: Module 09 vs Improved Design
+## Comparison: Module 10 vs Improved Design
 
-| Aspect | Module 09 (Everything-Table) | Improved (Aggregate-Oriented) |
+| Aspect | Module 10 (Everything-Table) | Improved (Aggregate-Oriented) |
 |--------|------------------------------|-------------------------------|
 | **Tables** | 1 table, 3 entity types | 2 tables (UserOrders, OrderItems) |
 | **Base table keys** | Generic: `entity_type`, `entity_id` | Natural: `user_id` + `sk`, `order_id` + `item_id` |
@@ -482,7 +482,7 @@ The improved design is:
 
 ## Practice Exercises
 
-1. Take the Module 09 `dynamodb_modeling` code and rewrite it to use the improved two-table design (UserOrders + OrderItems). Compare the query code for readability.
+1. Take the Module 10 `dynamodb_modeling` code and rewrite it to use the improved two-table design (UserOrders + OrderItems). Compare the query code for readability.
 
 2. A social media application has users, posts, comments, and likes. Analyze the access correlation between these entities and decide which should be item collections and which should be separate tables. Justify your decisions using the aggregate boundary framework.
 
@@ -514,7 +514,7 @@ The improved design is:
 - **Multi-attribute keys on GSIs** remain the right choice for indexed queries that need hierarchical filtering
 - **Additional patterns** (denormalization, sparse GSIs, hierarchical sort keys) optimize for specific access pattern needs
 
-The Module 09 design taught you the mechanics of multi-attribute keys and single-table design. This module taught you **when and how to apply them** within a principled design framework. The best DynamoDB models emerge from understanding your access patterns first, then choosing the simplest key structure that serves them.
+The Module 10 design taught you the mechanics of multi-attribute keys and single-table design. This module taught you **when and how to apply them** within a principled design framework. The best DynamoDB models emerge from understanding your access patterns first, then choosing the simplest key structure that serves them.
 
 ---
 
