@@ -215,6 +215,7 @@ movies.find({"genres": "Action", "imdb.rating": {"$gt": 7}}).sort("imdb.rating",
 
 <div style="margin-top:0.5rem; background:#f0fdf4; border-left:4px solid #16a34a; padding:0.5rem 0.9rem; font-size:0.86rem;">
   The <code>SORT</code> stage disappears — results come out of the index already in order. ESR field order lets MongoDB read sorted results in one B-tree walk.
+  See <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/07%20-%20MongoDB%20Indexing.md#compound-index-and-the-esr-rule" style="color:#16a34a;">notes/07 — ESR Rule</a> for the full mechanical explanation.
 </div>
 
 ---
