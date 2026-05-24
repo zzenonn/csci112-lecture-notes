@@ -165,8 +165,10 @@ Your prompt will show `(.venv)` when the environment is active. **Always activat
 ```python
 from pymongo import MongoClient
 
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
 # Connect to your VM's MongoDB instance
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
 # Select database and collection
 db = client["movies"]
@@ -184,7 +186,9 @@ movies_collection = db["movies"]
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["movies"]
 movies_collection = db["movies"]
 

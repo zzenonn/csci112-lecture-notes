@@ -18,7 +18,9 @@ All examples use **PyMongo** running on your laptop, connecting to `mongod` on a
 ```python
 from pymongo import MongoClient, ReturnDocument
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
 books  = db["books"]
 ```
@@ -308,14 +310,16 @@ Both the Computed and Approximation Patterns are valuable tools for optimizing M
 
 ## Full Example
 
-The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `<vm_ip_address>`. It assumes the `books` collection already exists from [notes/7a](7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). It defines `add_review` (Computed) and `add_review_approx` (Approximation), runs both end-to-end demos, then runs a roll-up into `book_summary`.
+The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `VM_IP_ADDRESS` constant. It assumes the `books` collection already exists from [notes/7a](7a%20-%20MongoDB%20Data%20Modeling%20Inheritance%20Pattern.md). It defines `add_review` (Computed) and `add_review_approx` (Approximation), runs both end-to-end demos, then runs a roll-up into `book_summary`.
 
 ```python
 import random
 import time
 from pymongo import MongoClient, ReturnDocument
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
 books  = db["books"]
 

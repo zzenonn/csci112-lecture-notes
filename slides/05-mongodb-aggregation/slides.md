@@ -86,7 +86,9 @@ layout: section
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["movies"]
 movies_collection = db["movies_small"]
 

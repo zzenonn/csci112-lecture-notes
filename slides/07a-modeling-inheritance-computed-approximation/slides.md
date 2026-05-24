@@ -216,7 +216,9 @@ All examples in this deck use PyMongo from your laptop, connecting to `mongod` o
 ```python
 from pymongo import MongoClient, ReturnDocument
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
 books  = db["books"]
 ```

@@ -66,7 +66,9 @@ Connect to your MongoDB instance:
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
 books  = db["books"]
 ```
@@ -413,12 +415,14 @@ For further questions or assistance, please reach out during office hours or pos
 
 ## Full Example
 
-The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `<vm_ip_address>`. It drops `books`, inserts the three messy sample documents, runs the aggregation-based migration (Pass 1 normalizes fields; Pass 2 sets `product_type` per subtype), and prints the final, normalized documents.
+The script below is the entire walkthrough in one file — copy-paste it into a Python REPL or a `.py` file after editing the `VM_IP_ADDRESS` constant. It drops `books`, inserts the three messy sample documents, runs the aggregation-based migration (Pass 1 normalizes fields; Pass 2 sets `product_type` per subtype), and prints the final, normalized documents.
 
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
 books  = db["books"]
 

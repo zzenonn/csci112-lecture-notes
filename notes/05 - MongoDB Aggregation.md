@@ -69,7 +69,9 @@ MongoDB's aggregation pipeline is a specific implementation: documents enter, fl
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["movies"]
 movies_collection = db["movies_small"]
 
@@ -97,7 +99,9 @@ Run this script from your host machine to create the `movies_small` collection u
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["movies"]
 movies_collection = db["movies_small"]
 

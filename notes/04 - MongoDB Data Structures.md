@@ -252,7 +252,9 @@ Your shell prompt will show `(.venv)` when the environment is active. Always act
 from pymongo import MongoClient
 
 # Replace with your VM's IP address
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
 # Select database and collection
 db = client["movies"]
@@ -272,7 +274,9 @@ From here on, all examples use PyMongo. The query operator syntax (`$gt`, `$or`,
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["movies"]
 movies_collection = db["movies"]
 
@@ -322,7 +326,9 @@ Before continuing, insert the full sample dataset that the remaining examples de
 ```python
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<vm_ip_address>:27017/")
+VM_IP_ADDRESS = "192.168.1.100"
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 movies_collection = client["movies"]["movies"]
 
 movies_collection.drop()
