@@ -1,5 +1,5 @@
 {
-  "name": "csci112-08-dynamodb-intro",
+  "name": "csci112-09-dynamodb-intro",
   "type": "module",
   "scripts": {
     "build": "slidev build",

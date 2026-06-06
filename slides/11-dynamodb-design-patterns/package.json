@@ -1,5 +1,5 @@
 {
-  "name": "csci112-10-dynamodb-design-patterns",
+  "name": "csci112-11-dynamodb-design-patterns",
   "type": "module",
   "scripts": {
     "build": "slidev build",

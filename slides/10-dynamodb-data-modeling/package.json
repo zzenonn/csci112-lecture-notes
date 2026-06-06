@@ -1,5 +1,5 @@
 {
-  "name": "csci112-09-dynamodb-data-modeling",
+  "name": "csci112-10-dynamodb-data-modeling",
   "type": "module",
   "scripts": {
     "build": "slidev build",

@@ -1,5 +1,5 @@
 {
-  "name": "csci112-07c-modeling-subset",
+  "name": "csci112-08c-modeling-subset",
   "type": "module",
   "scripts": {
     "build": "slidev build",
