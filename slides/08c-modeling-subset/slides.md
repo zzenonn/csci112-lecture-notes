@@ -120,6 +120,9 @@ Keep a **small subset** of frequently accessed data in the main document. Move t
 
 Use an aggregation pipeline to extract all embedded reviews into the `reviews` collection:
 
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:start; margin-top:0.8rem;">
+<div>
+
 ```javascript
 const copyReviews = [
   { $unwind: { path: "$reviews" } },
@@ -130,6 +133,9 @@ const copyReviews = [
 db.books.aggregate(copyReviews)
 ```
 
+</div>
+<div>
+
 Each review document in the new collection:
 
 ```json
@@ -138,9 +144,12 @@ Each review document in the new collection:
   "text": "...",
   "upvotes": 12,
   "rating": 7,
-  "book_id": 2         // ← back-reference to the book
+  "book_id": 2   // ← back-ref
 }
 ```
+
+</div>
+</div>
 
 ---
 
