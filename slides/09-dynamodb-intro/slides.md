@@ -35,12 +35,12 @@ layout: section
 
 # Serverless and Fully Managed
 
-Unlike MongoDB — where you installed and configured the server on a VM — DynamoDB is **serverless**:
+Unlike MongoDB — or a traditional SQL server — where you installed and configured the server on a VM, DynamoDB is **serverless**:
 
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; margin-top:1rem; font-size:0.86rem;">
   <div style="border:1.5px solid #dc2626; border-radius:6px; padding:0.8rem; background:#fef2f2;">
-    <div style="font-weight:700; margin-bottom:0.3rem; color:#991b1b;">MongoDB (self-hosted)</div>
-    You install and configure <code>mongod</code>.<br>
+    <div style="font-weight:700; margin-bottom:0.3rem; color:#991b1b;">Self-hosted (MongoDB or SQL)</div>
+    You install and configure the server (<code>mongod</code>, PostgreSQL, MySQL…).<br>
     You manage updates, storage, replication.<br>
     You pay for the VM whether it is idle or busy.
   </div>
@@ -85,21 +85,24 @@ DynamoDB supports two data models in one service:
 
 # Tables, Items, and Attributes
 
+<div style="font-size:0.9rem;">
+
 | DynamoDB | Relational | MongoDB |
 |----------|------------|---------|
 | Table | Table | Collection |
 | Item | Row | Document |
 | Attribute | Column | Field |
 
+</div>
+
 DynamoDB is **schemaless** aside from the primary key — different items in the same table can have different attributes.
 
 ```python
-# Two items in the same table, different attributes — perfectly valid
 { "artist": "Taylor Swift", "song": "Cardigan", "album": "Folklore", "year": 2020 }
 { "artist": "Lady Gaga",    "song": "Rain on Me", "feat": "Ariana Grande" }
 ```
 
-<div style="margin-top:0.7rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.5rem 1rem; font-size:0.86rem;">
+<div style="margin-top:0.6rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.4rem 1rem; font-size:0.82rem;">
   Max item size in DynamoDB: <strong>400 KB</strong>. MongoDB documents can be up to 16 MB.
 </div>
 
@@ -113,6 +116,9 @@ layout: section
 
 # Simple vs Composite Primary Key
 
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:start; margin-top:0.5rem;">
+<div>
+
 **Simple key** — partition key only:
 
 ```
@@ -125,18 +131,24 @@ Users table
 └──────────────┴──────────────┘
 ```
 
-**Composite key** — partition key + sort key:
+</div>
+<div>
+
+**Composite key** — partition + sort key:
 
 ```
 Music table
-┌──────────────┬──────────────┬────────────┐
-│ artist (PK)  │ song (SK)    │ album      │
-├──────────────┼──────────────┼────────────┤
-│ Taylor Swift │ Cardigan     │ Folklore   │
-│ Taylor Swift │ The 1        │ Folklore   │
-│ Lady Gaga    │ Rain on Me   │ Chromatica │
-└──────────────┴──────────────┴────────────┘
+┌──────────────┬────────────┬────────────┐
+│ artist (PK)  │ song (SK)  │ album      │
+├──────────────┼────────────┼────────────┤
+│ Taylor Swift │ Cardigan   │ Folklore   │
+│ Taylor Swift │ The 1      │ Folklore   │
+│ Lady Gaga    │ Rain on Me │ Chromatica │
+└──────────────┴────────────┴────────────┘
 ```
+
+</div>
+</div>
 
 Items with the same partition key are **stored together** and **sorted by the sort key**.
 
@@ -182,35 +194,45 @@ For this course we use **on-demand** billing.
 
 # Environment Setup
 
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:start; margin-top:0.4rem; font-size:0.92rem;">
+<div>
+
 ```bash
 # 1. Clone sample repository
 git clone https://github.com/zzenonn/dynamodb_sample.git
 cd dynamodb_sample
 
-# 2. Create and activate virtual environment
+# 2. Create + activate virtual env
 python3 -m venv .venv
-source .venv/bin/activate          # macOS/Linux
-# .venv\Scripts\activate           # Windows
+source .venv/bin/activate   # macOS/Linux
+# .venv\Scripts\activate    # Windows
 
 # 3. Install dependencies
 pip install -r requirements.txt
 ```
 
-AWS credentials in `~/.aws/credentials`:
+</div>
+<div>
+
+Credentials in `~/.aws/credentials`, region in `~/.aws/config`:
 
 ```ini
 [default]
 aws_access_key_id     = YOUR_ACCESS_KEY
 aws_secret_access_key = YOUR_SECRET_KEY
-```
-
-`~/.aws/config`:
-
-```ini
-[default]
 region = us-east-1
-output = json
 ```
+
+Or via **environment variables** (override the files):
+
+```bash
+export AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY
+export AWS_SECRET_ACCESS_KEY=YOUR_SECRET_KEY
+export AWS_DEFAULT_REGION=us-east-1
+```
+
+</div>
+</div>
 
 ---
 layout: section
@@ -273,19 +295,25 @@ table = dynamodb.create_table(
 
 # Inserting and Reading Items
 
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:start; margin-top:0.4rem;">
+<div>
+
 **Insert with `put_item()`:**
 
 ```python
 music_table = dynamodb.Table('music')
 
 music_table.put_item(Item={
-    'artist': 'Taylor Swift',   # partition key — required
-    'song':   'Cardigan',       # sort key — required
+    'artist': 'Taylor Swift',  # PK — required
+    'song':   'Cardigan',      # SK — required
     'album':  'Folklore',
     'year':   2020,
 })
-# If an item with the same PK+SK exists, put_item() REPLACES it entirely
+# Same PK+SK exists → REPLACES it entirely
 ```
+
+</div>
+<div>
 
 **Query by partition key:**
 
@@ -299,7 +327,10 @@ for item in response['Items']:
     print(item['song'])
 ```
 
-<div style="margin-top:0.5rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.86rem;">
+</div>
+</div>
+
+<div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.86rem;">
   <code>query()</code> always requires the partition key. You cannot query by arbitrary attributes without an index — by design.
 </div>
 
@@ -307,24 +338,35 @@ for item in response['Items']:
 
 # Querying with Sort Key and LSI
 
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:start; margin-top:0.4rem;">
+<div>
+
 **Filter by partition key + sort key:**
 
 ```python
 response = music_table.query(
-    KeyConditionExpression=Key('artist').eq('Taylor Swift') &
-                           Key('song').eq('Cardigan')
+    KeyConditionExpression=
+        Key('artist').eq('Taylor Swift') &
+        Key('song').eq('Cardigan')
 )
 ```
 
-**Query via Local Secondary Index (artist + album):**
+</div>
+<div>
+
+**Query via LSI (artist + album):**
 
 ```python
 response = music_table.query(
     IndexName='album_index',
-    KeyConditionExpression=Key('artist').eq('Taylor Swift') &
-                           Key('album').eq('Folklore')
+    KeyConditionExpression=
+        Key('artist').eq('Taylor Swift') &
+        Key('album').eq('Folklore')
 )
 ```
+
+</div>
+</div>
 
 <div style="margin-top:0.7rem; background:#f0fdf4; border-left:4px solid #16a34a; padding:0.5rem 0.9rem; font-size:0.85rem;">
   See <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/09%20-%20Introduction%20to%20DynamoDB.md" style="color:#16a34a;">notes/09 — Introduction to DynamoDB</a> for the full scripts (<code>music.py</code>, <code>insert_music.py</code>, <code>read_music.py</code>).
