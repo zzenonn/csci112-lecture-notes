@@ -103,25 +103,17 @@ An **item collection** is a group of items that share the same partition key.
 
 ```
 UserOrders table  (PK: user_id, SK: sk)
-┌──────────────┬──────────────────┬────────────────────────────────┐
-│ user_id      │ sk               │ Attributes                     │
-├──────────────┼──────────────────┼────────────────────────────────┤
-│ aarchamb     │ PROFILE          │ email, address, fullname       │
-│ aarchamb     │ ORDER#abc123     │ address, status, created_at    │
-│ aarchamb     │ ORDER#def456     │ address, status, created_at    │
-│ tgrimes1     │ PROFILE          │ email, address, fullname       │
-│ tgrimes1     │ ORDER#xyz789     │ address, status, created_at    │
-└──────────────┴──────────────────┴────────────────────────────────┘
+┌──────────┬──────────────┬─────────────────────────────┐
+│ user_id  │ sk           │ Attributes                  │
+├──────────┼──────────────┼─────────────────────────────┤
+│ aarchamb │ PROFILE      │ email, address, fullname    │
+│ aarchamb │ ORDER#abc123 │ address, status, created_at │
+│ tgrimes1 │ PROFILE      │ email, address, fullname    │
+│ tgrimes1 │ ORDER#xyz789 │ address, status, created_at │
+└──────────┴──────────────┴─────────────────────────────┘
 ```
 
-All three common patterns hit the **base table** — no GSI needed:
-
-```python
-table.get_item(Key={'user_id': 'aarchamb', 'sk': 'PROFILE'})   # profile only
-table.query(KeyConditionExpression=Key('user_id').eq('aarchamb'))  # everything
-table.query(KeyConditionExpression=Key('user_id').eq('aarchamb') &
-                                   Key('sk').begins_with('ORDER#'))  # orders only
-```
+All three common patterns hit the **base table** — no GSI needed: `get_item` on `PROFILE` (profile), `query` on `user_id` alone (everything), or add `& Key('sk').begins_with('ORDER#')` (orders only).
 
 ---
 
@@ -139,7 +131,7 @@ An **identifying relationship** exists when a child entity cannot exist without 
   <div style="border:1.5px solid #16a34a; border-radius:6px; padding:0.8rem; background:#f0fdf4;">
     <div style="font-weight:700; margin-bottom:0.3rem; color:#166534;">Item collection (cost-optimized)</div>
     <code>UserOrders</code> table: PK = <code>user_id</code><br>
-    SK = <code>ORDER#<order_id></code><br>
+    SK = <code>ORDER#&lt;order_id&gt;</code><br>
     Query by user hits base table directly — no GSI
   </div>
 </div>
@@ -208,15 +200,54 @@ Applying the framework to users, orders, and items:
 
 # Module 10 vs Improved Design
 
-| Aspect | Module 10 | Improved |
-|--------|-----------|---------|
-| Tables | 1 (3 entity types) | 2 (UserOrders, OrderItems) |
-| Base table keys | Generic: `entity_type`, `entity_id` | Natural: `user_id`+`sk`, `order_id`+`item_id` |
-| Get user + orders | Requires GSI | Base table query |
-| Get items for order | Requires GSI | Base table query |
-| GSIs for basic queries | 2 minimum | 0 |
-| DynamoDB Streams | Mixed events | Separate per table |
-| Cost | GSI write amplification | Lower — fewer GSIs |
+<div style="margin-top:0.6rem;">
+<table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+  <thead>
+    <tr style="background:#f1f5f9;">
+      <th style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem; text-align:left;">Aspect</th>
+      <th style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem; text-align:left;">Module 10</th>
+      <th style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem; text-align:left;">Improved</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Tables</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">1 (3 entity types)</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">2 (UserOrders, OrderItems)</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Base table keys</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Generic: <code>entity_type</code>, <code>entity_id</code></td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Natural: <code>user_id</code>+<code>sk</code>, <code>order_id</code>+<code>item_id</code></td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Get user + orders</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Requires GSI</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Base table query</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Get items for order</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Requires GSI</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Base table query</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">GSIs for basic queries</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">2 minimum</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">0</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">DynamoDB Streams</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Mixed events</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Separate per table</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Cost</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">GSI write amplification</td>
+      <td style="border:1px solid #cbd5e1; padding:0.35rem 0.7rem;">Lower — fewer GSIs</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 layout: section
@@ -230,22 +261,32 @@ layout: section
 
 Duplicate a frequently needed attribute from a related entity to avoid an extra lookup:
 
+<div style="display:grid; grid-template-columns:1.1fr 1fr; gap:1rem; align-items:start; margin-top:0.5rem;">
+<div style="font-size:0.72rem;">
+
 ```python
-# Include product_name from Products table directly on the line item
+# product_name copied onto the line item
 item = {
     'order_id': 'abc123',
     'item_id': 'itm001',
     'product_id': 'prod-macbook',
-    'product_name': 'New Apple MacBook Pro',  # Duplicated — avoids lookup
+    'product_name': 'New Apple MacBook Pro',
+    #   ↑ duplicated — avoids a lookup
     'quantity': 1,
     'price': Decimal('2018.42')
 }
 ```
 
-Use when:
+</div>
+<div style="font-size:0.8rem;">
+
+**Use when:**
 1. The access pattern would otherwise require a cross-table lookup
 2. The duplicated attribute is mostly immutable (product names rarely change)
 3. The attribute is small
+
+</div>
+</div>
 
 <div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.85rem;">
   If the source value changes, you must update all copies. Only denormalize stable attributes.
@@ -279,9 +320,9 @@ completed_order = {
 
 ---
 
-# Hierarchical Sort Keys and Temporal Patterns
+# Hierarchical Sort Keys & Time
 
-**Hierarchical sort key** — encode hierarchy in the SK for prefix queries:
+**Hierarchical sort key** — encode hierarchy in the SK for prefix queries. For GSIs on the same data, use **multi-attribute keys** instead of composite strings.
 
 ```python
 # LocationData: PK = device_id, SK = "year#month#day#time"
@@ -289,18 +330,12 @@ table.query(Key('device_id').eq('sensor-01') & Key('sk').begins_with('2024#01'))
 # All readings for device in January 2024
 ```
 
-For GSIs on the same data, use **multi-attribute keys** instead of composite strings.
-
 **Timestamp format** — choose based on query needs:
 
 | Format | Example | Best for |
 |--------|---------|----------|
 | ISO 8601 string | `"2024-01-15T14:30:00Z"` | Human-readable, natural sort order |
-| Unix epoch (number) | `1705326600` | TTL attribute, math operations |
-
-<div style="margin-top:0.6rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.5rem 0.9rem; font-size:0.85rem;">
-  DynamoDB TTL requires Unix epoch seconds (a number type). Use ISO strings everywhere else.
-</div>
+| Unix epoch (number) | `1705326600` | Math ops; **required** for TTL |
 
 ---
 
