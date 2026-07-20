@@ -25,6 +25,7 @@
   - [Step 2: User Operations](#step-2-user-operations)
   - [Step 3: Order and Item Operations](#step-3-order-and-item-operations)
   - [Step 4: Querying with Multi-Attribute GSIs](#step-4-querying-with-multi-attribute-gsis)
+  - [Step 5: Querying by Status and Date (Access Pattern 4)](#step-5-querying-by-status-and-date-access-pattern-4)
   - [Running the Example](#running-the-example)
 - [Multi-Attribute Keys for Hierarchical Data](#multi-attribute-keys-for-hierarchical-data)
 - [Historical Context: Synthetic Key Prefixes](#historical-context-synthetic-key-prefixes)
@@ -186,11 +187,14 @@ Sparse indexing acts as a natural entity filter -- no application logic needed.
 
 Before designing the table, we list the queries our application needs:
 
-1. **Get a user profile** by username
-2. **Get all orders** for a user
-3. **Get everything** for a user (profile + orders)
-4. **Get all line items** for an order
-5. **Get a specific order** or item by type + ID
+1. **Get user profile** by username
+2. **Get orders for user** (profile + orders in one query)
+3. **Get single order and order items**
+4. **Get orders for user by status and date** ✳
+5. **Get all pending orders** ✳
+
+> ✳ Patterns 4 and 5 build on the same multi-attribute technique. Pattern 4 is
+> worked below; **pattern 5 is left as an exercise.**
 
 ### Table Design
 
@@ -398,6 +402,64 @@ response = table.query(
 )
 # Returns: the ORDER entity + all ITEM entities
 ```
+
+### Step 5: Querying by Status and Date (Access Pattern 4)
+
+Access pattern 4 -- *"get a user's orders by status within a date range"* -- needs a
+sort key that carries **both** status and date. We compose them into a single
+`status_date` attribute, **status first, then date**:
+
+```python
+order = {
+    'entity_type': 'ORDER',
+    'entity_id': 'abc123',
+    'username': 'aarchamb',
+    'order_id': 'abc123',
+    'status': 'Placed',
+    'order_date': '2024-01-15',
+    'status_date': 'Placed#2024-01-15',   # composed SK: status first, then date
+    'address': 'home'
+}
+```
+
+A GSI (`status-date-index`) uses `username` as the partition key and `status_date`
+as the sort key:
+
+```python
+{
+    'IndexName': 'status-date-index',
+    'KeySchema': [
+        {'AttributeName': 'username',    'KeyType': 'HASH'},
+        {'AttributeName': 'status_date', 'KeyType': 'RANGE'}
+    ],
+    'Projection': {'ProjectionType': 'INCLUDE',
+                   'NonKeyAttributes': ['order_id', 'address']}
+}
+```
+
+Because the sort key stores `status` before `date`, orders are physically grouped
+by status, and dates stay ordered *within* each status. That ordering is what makes
+the range query a single contiguous read:
+
+```python
+response = table.query(
+    IndexName='status-date-index',
+    KeyConditionExpression=Key('username').eq('aarchamb') &
+                           Key('status_date').between('Placed#2024-01-01',
+                                                      'Placed#2024-01-31')
+)
+# Returns: aarchamb's orders with status 'Placed' dated in January
+```
+
+The `Placed#` prefix pins the status; the date range slices within it. **Attribute
+order matters** -- composing it date-first (`2024-01-15#Placed`) would scatter each
+status's orders across the index, and "all Placed orders this month" would no longer
+be one contiguous slice.
+
+> **Exercise (Access Pattern 5):** *Get all pending orders* across every user.
+> Design a **sparse index** keyed on `status` (only orders carry a `status`
+> attribute, so user profiles and items are automatically excluded). Implement the
+> table change and the query.
 
 ### Running the Example
 
