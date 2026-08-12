@@ -5,7 +5,7 @@ highlighter: shiki
 layout: cover
 ---
 
-Databases in the Real World
+Design considerations and workload requirements
 
 ::author-info::
 Miguel Zenon Nicanor Lerias Saavedra, PhD
@@ -21,6 +21,10 @@ Contemporary Databases
 1. Understand the **design considerations** that need to be made when choosing a database technology
 2. Understand the **workload requirements** for running a database
 
+<div style="margin-top:1.5rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.7rem 1.1rem; font-size:0.95rem;">
+  Later in this course you will meet the specific design criteria for each database service. For now, the goal is to know <strong>which questions to ask</strong> before picking one.
+</div>
+
 ---
 layout: section
 ---
@@ -31,140 +35,147 @@ When localhost is no longer enough
 
 ---
 
-# How Have You Been Running Your Apps?
+# Where Does Your Database Live?
+
+<div style="display:grid; grid-template-columns:1fr 1.15fr; gap:1.5rem; align-items:start; margin-top:0.5rem;">
+<div>
+
+How have you been running your apps?
 
 - `http://localhost:8080`
 - Physical server
 - Virtual Machines
 - Serverless Infrastructure
 
----
-
-# Where Do You Put Your Database?
-
-<div style="display:flex; justify-content:center; margin-top:2rem;">
-  <div style="border:2px solid #ccc; border-radius:8px; padding:2rem; width:65%;">
-    <div style="background:#888; color:#fff; text-align:center; padding:1rem; border-radius:4px; margin-bottom:0.75rem; font-family:monospace;">
-      PHP / Java / NodeJS / React / Etc
-    </div>
-    <div style="background:#666; color:#fff; text-align:center; padding:1rem; border-radius:4px; font-family:monospace;">
-      MySQL / PostgreSQL / MSSQL / Etc
-    </div>
-    <div style="text-align:center; margin-top:0.75rem; color:#888;">Computer</div>
+</div>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem;">
+  <div style="font-size:0.8rem; color:#666; text-align:center; margin-bottom:0.6rem;">Co-located: one machine</div>
+  <div style="background:#9ca3af; color:#fff; text-align:center; padding:0.7rem; border-radius:4px; margin-bottom:0.5rem; font-size:0.85rem;">
+    PHP / Java / NodeJS / React
   </div>
+  <div style="background:#6b7280; color:#fff; text-align:center; padding:0.7rem; border-radius:4px; font-size:0.85rem;">
+    MySQL / PostgreSQL / MSSQL
+  </div>
+  <div style="text-align:center; margin-top:0.6rem; color:#888; font-size:0.8rem;">Computer</div>
+</div>
+</div>
+
+<div style="margin-top:0.9rem; font-size:0.95rem;">
+  Everything on one box is the simplest thing that works — until one of the considerations below forces it apart.
 </div>
 
 ---
 
-# Design Considerations
+# Performance
 
-### Performance
+<div style="display:grid; grid-template-columns:1fr 1.2fr; gap:1.5rem; align-items:start; margin-top:0.3rem;">
+<div>
 
-What are the **performance** features required for the workload?
+What **performance** features does the workload require?
 
 - Required latency
 - IOPS
 - Read/write throughput
 - Concurrency
 
----
-
-# Where Do You Put Your Database?
-
-### Separate Database Server
-
-<div style="display:flex; align-items:center; justify-content:center; gap:2.5rem; margin-top:2.5rem;">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
-    <div style="width:3.5rem; height:3.5rem; background:#dbeafe; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.75rem; border:2px solid #93c5fd;">👤</div>
-    <span style="font-size:0.85rem; color:#888;">User</span>
+</div>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem; font-size:0.85rem;">
+  <div style="font-size:0.8rem; color:#666; text-align:center; margin-bottom:0.7rem;">Separate database server</div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:0.6rem; margin-bottom:0.6rem;">
+    <div style="border:1.5px solid #93c5fd; background:#dbeafe; border-radius:4px; padding:0.4rem 0.7rem;">User</div>
+    <span style="color:#9ca3af;">&rarr;</span>
+    <div style="border:1.5px solid #93c5fd; background:#dbeafe; border-radius:4px; padding:0.4rem 0.7rem; text-align:center;">
+      Application Server<br><span style="font-size:0.7rem; color:#888;">http://example.com/</span>
+    </div>
   </div>
-  <div style="color:#aaa; font-size:1.5rem; font-weight:bold;">→</div>
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
-    <div style="width:5rem; height:3.5rem; background:#dbeafe; border:2px solid #93c5fd; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🖥️</div>
-    <span style="font-size:0.85rem; color:#888;">Application Server</span>
-    <span style="font-size:0.7rem; color:#aaa;">http://example.com/</span>
+  <div style="text-align:center; color:#9ca3af; margin-bottom:0.4rem;">&darr;</div>
+  <div style="border:1.5px solid #f97316; border-radius:6px; padding:0.6rem;">
+    <div style="background:#ffedd5; border:1.5px solid #fdba74; border-radius:4px; padding:0.4rem; text-align:center;">Database Server</div>
+    <div style="color:#f97316; font-size:0.72rem; text-align:center; margin-top:0.4rem;">Private Network</div>
   </div>
-  <div style="color:#aaa; font-size:1.5rem; font-weight:bold;">→</div>
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
-    <div style="width:5rem; height:3.5rem; background:#ffedd5; border:2px solid #f97316; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🗄️</div>
-    <span style="font-size:0.85rem; color:#888;">Database Server</span>
-    <span style="font-size:0.7rem; color:#f97316;">Private Network</span>
-  </div>
+</div>
+</div>
+
+<div style="margin-top:0.8rem; font-size:0.95rem;">
+  Moving the database onto its own host stops the application from competing with it for CPU, memory, and disk.
 </div>
 
 ---
 
-# Design Considerations
+# High Availability
 
-### High Availability
+<div style="display:grid; grid-template-columns:1fr 1.3fr; gap:1.4rem; align-items:start; margin-top:0.3rem;">
+<div>
 
-What are the **high availability** features required for the workload?
+What **high availability** features does the workload require?
 
 - Read replicas
 - Clustering
 - Geo-distributed deployments
 
----
-
-# Where Do You Put Your Database?
-
-### Primary-Replica Database Replication
-
-<div style="display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-top:1.5rem; font-size:0.9rem;">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
-    <div style="font-size:2rem;">👤</div>
-    <span style="color:#888;">User</span>
+</div>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.9rem; font-size:0.82rem;">
+  <div style="font-size:0.78rem; color:#666; text-align:center; margin-bottom:0.6rem;">Primary&ndash;replica replication</div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; margin-bottom:0.6rem;">
+    <div style="border:1.5px solid #93c5fd; background:#dbeafe; border-radius:4px; padding:0.35rem 0.6rem;">User</div>
+    <span style="color:#9ca3af;">&rarr;</span>
+    <div style="border:1.5px solid #93c5fd; background:#dbeafe; border-radius:4px; padding:0.35rem 0.6rem;">Load Balancer</div>
   </div>
-  <div style="color:#aaa; font-size:1.25rem;">→</div>
-  <div style="display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
-    <div style="width:4rem; height:2.5rem; background:#dbeafe; border:1.5px solid #93c5fd; border-radius:4px; display:flex; align-items:center; justify-content:center;">⚖️</div>
-    <span style="color:#888; font-size:0.8rem;">Load Balancer</span>
-    <span style="color:#aaa; font-size:0.7rem;">http://example.com/</span>
-  </div>
-  <div style="color:#aaa; font-size:1.25rem;">→</div>
-  <div style="border:2px solid #f97316; border-radius:8px; padding:1rem;">
-    <div style="color:#f97316; font-size:0.75rem; text-align:center; font-weight:bold; margin-bottom:0.5rem;">app-backend</div>
-    <div style="display:flex; gap:1.5rem;">
-      <div style="display:flex; flex-direction:column; gap:0.5rem;">
-        <div style="width:3.5rem; height:2rem; background:#e5e7eb; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#404040;">app-1</div>
-        <div style="width:3.5rem; height:2rem; background:#e5e7eb; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#404040;">app-2</div>
+  <div style="text-align:center; color:#9ca3af; margin-bottom:0.4rem;">&darr;</div>
+  <div style="border:1.5px solid #f97316; border-radius:6px; padding:0.6rem;">
+    <div style="display:flex; gap:0.8rem; align-items:center; justify-content:center;">
+      <div style="display:flex; flex-direction:column; gap:0.35rem;">
+        <div style="background:#e5e7eb; border-radius:4px; padding:0.3rem 0.7rem; text-align:center;">app-1</div>
+        <div style="background:#e5e7eb; border-radius:4px; padding:0.3rem 0.7rem; text-align:center;">app-2</div>
       </div>
-      <div style="display:flex; flex-direction:column; gap:0.5rem;">
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <div style="width:4rem; height:2rem; background:#bfdbfe; border:1.5px solid #3b82f6; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#404040;">Primary</div>
-          <span style="color:#888; font-size:0.7rem;">← read/write</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <div style="width:4rem; height:2rem; background:#e5e7eb; border:1.5px solid #9ca3af; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#404040;">Replica</div>
-          <span style="color:#888; font-size:0.7rem;">← read</span>
-        </div>
-        <div style="font-size:0.65rem; color:#aaa; text-align:center;">Replication ↕</div>
+      <span style="color:#9ca3af;">&rarr;</span>
+      <div style="display:flex; flex-direction:column; gap:0.35rem;">
+        <div style="background:#bfdbfe; border:1.5px solid #3b82f6; border-radius:4px; padding:0.3rem 0.6rem;">Primary <span style="color:#666; font-size:0.72rem;">r/w</span></div>
+        <div style="text-align:center; color:#9ca3af; font-size:0.72rem;">&updownarrow; replication</div>
+        <div style="background:#e5e7eb; border:1.5px solid #9ca3af; border-radius:4px; padding:0.3rem 0.6rem;">Replica <span style="color:#666; font-size:0.72rem;">read</span></div>
       </div>
     </div>
-    <div style="color:#f97316; font-size:0.7rem; text-align:center; margin-top:0.5rem;">Private Network</div>
+    <div style="color:#f97316; font-size:0.72rem; text-align:center; margin-top:0.5rem;">Private Network</div>
   </div>
+</div>
 </div>
 
 ---
 
-# Design Considerations
+# Backup and Recovery
 
-### Backup and Recovery
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; margin-top:0.3rem;">
+<div>
 
-What are the **backup and recovery** features required for the workload?
+What **backup and recovery** features does the workload require?
 
-- Automated and Scheduled Backups
+- Automated and scheduled backups
 - Point-in-Time Recovery (PITR)
-- Disaster Recovery and Redundancy
-- Fast Recovery and Minimal Downtime
+- Disaster recovery and redundancy
+- Fast recovery and minimal downtime
+
+</div>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem; font-size:0.88rem;">
+  <div style="margin-bottom:0.8rem;">
+    <div style="font-weight:700; color:#0369a1;">RPO &mdash; Recovery Point Objective</div>
+    How much data can you afford to lose? Sets your <strong>backup frequency</strong>.
+  </div>
+  <div>
+    <div style="font-weight:700; color:#0369a1;">RTO &mdash; Recovery Time Objective</div>
+    How long can you afford to be down? Sets your <strong>restore strategy</strong>.
+  </div>
+</div>
+</div>
+
+<div style="margin-top:0.9rem; background:#fef9c3; border-left:4px solid #ca8a04; padding:0.6rem 1.1rem; font-size:0.95rem;">
+  A backup you have never restored is not a backup. Both numbers are business decisions, not technical ones.
+</div>
 
 ---
 
-# Based on Your Workload...
-
-<div style="display:flex; align-items:center; justify-content:center; height:70%; text-align:center;">
-  <p style="font-size:2.5rem; font-weight:700; color:#404040; line-height:1.4;">
-    Identify which design criteria seem to be <strong style="color:#00b0f0;">most important</strong>.
+<div style="display:flex; align-items:center; justify-content:center; height:78%; text-align:center;">
+  <p style="font-size:2.4rem; font-weight:700; color:#404040; line-height:1.4;">
+    Based on your workload, identify which design criteria are <strong style="color:#00b0f0;">most important</strong>.
   </p>
 </div>
 
@@ -180,57 +191,109 @@ When SQL is no longer enough
 
 # What Database Are You Running?
 
-<div style="display:flex; justify-content:center; margin-top:1.5rem;">
-  <img src="/db-sql.png" style="max-height:380px; object-fit:contain;" />
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:center; margin-top:0.5rem;">
+<div style="display:flex; justify-content:center;">
+  <img src="/db-sql.png" style="max-height:280px; object-fit:contain;" />
+</div>
+<div>
+
+For most of your degree, the answer has been a **relational database** — and for most workloads, that is still the right answer.
+
+The rest of this section is about the workloads where it stops being the right answer.
+
+</div>
 </div>
 
 ---
 
-# Workload Requirements
+# Data Storage
 
-### Data Storage
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; margin-top:0.3rem;">
+<div>
 
-What type of **data storage** do you need for your workload?
+What type of **data storage** does the workload need?
 
 - File system
 - Object store
 - Relational database
 - Nonrelational database
 
+</div>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem; font-size:0.88rem;">
+  Not every problem is a database problem. Large blobs, media, and logs usually belong in a <strong>file system</strong> or <strong>object store</strong>, with only their metadata in the database.
+</div>
+</div>
+
 ---
 
-# Workload Requirements
+# Data Volume, Velocity, and Variety
 
-### Data Volume, Velocity, and Variety
+<div style="display:grid; grid-template-columns:1fr 1.25fr; gap:1.4rem; align-items:start; margin-top:0.3rem;">
+<div>
 
-What is the **volume, velocity, and variety** of data in your workload?
+What is the **volume, velocity, and variety** of the workload's data?
 
 - Data volume
 - Data velocity
 - Data variety
 
+</div>
+<div style="font-size:0.86rem;">
+<table style="width:100%; border-collapse:collapse;">
+  <tbody>
+    <tr>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem; background:#f8fafc; font-weight:700; white-space:nowrap;">Volume</td>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem;">How much data, and how fast does it grow?</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem; background:#f8fafc; font-weight:700; white-space:nowrap;">Velocity</td>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem;">How quickly does it arrive, and must it be read back?</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem; background:#f8fafc; font-weight:700; white-space:nowrap;">Variety</td>
+      <td style="border:1px solid #e2e8f0; padding:0.45rem 0.7rem;">Does every record have the same shape?</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
 ---
 
-# Workload Requirements
+# Data Usage
 
-### Data Usage
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; margin-top:0.3rem;">
+<div style="border:1.5px solid #93c5fd; border-radius:8px; padding:0.9rem 1.1rem; background:#f0f9ff; font-size:0.92rem;">
+  <div style="font-weight:700; color:#0369a1; margin-bottom:0.4rem;">SQL data organization</div>
+  <ul style="margin:0; padding-left:1.2rem;">
+    <li style="font-size:0.92rem; margin:0.25rem 0;">OLTP or OLAP</li>
+    <li style="font-size:0.92rem; margin:0.25rem 0;">DSS</li>
+    <li style="font-size:0.92rem; margin:0.25rem 0;">Data warehouse</li>
+  </ul>
+</div>
+<div style="border:1.5px solid #86efac; border-radius:8px; padding:0.9rem 1.1rem; background:#f0fdf4; font-size:0.92rem;">
+  <div style="font-weight:700; color:#166534; margin-bottom:0.4rem;">NoSQL access patterns</div>
+  <ul style="margin:0; padding-left:1.2rem;">
+    <li style="font-size:0.92rem; margin:0.25rem 0;">IoT</li>
+    <li style="font-size:0.92rem; margin:0.25rem 0;">Session state</li>
+  </ul>
+</div>
+</div>
 
-How will the **data** in your workload be used?
-
-- SQL data organization
-  - OLTP or OLAP
-  - DSS
-  - Data warehouse
-- NoSQL access patterns
-  - IoT
-  - Session state
+<div style="margin-top:1rem; font-size:0.95rem;">
+  How the data will be <strong>used</strong> matters more than how it is stored. SQL designs start from the <strong>schema</strong>; NoSQL designs start from the <strong>queries</strong> — a theme for the rest of the course.
+</div>
 
 ---
 
-# What Database Are You Running?
+# What Could You Be Running?
 
-<div style="display:flex; justify-content:center; margin-top:1.5rem;">
-  <img src="/db-logos.png" style="max-height:380px; object-fit:contain;" />
+<div style="display:flex; justify-content:center; margin-top:0.3rem;">
+  <img src="/db-logos.png" style="max-height:260px; object-fit:contain;" />
+</div>
+
+<div style="margin-top:0.9rem; font-size:0.95rem; text-align:center;">
+  Each engine trades the criteria above against each other differently. Choosing well is the point of this course.
 </div>
 
 ---
