@@ -23,7 +23,7 @@ CSCI 112 / 212 - Contemporary Databases
   - [Connecting to MongoDB from Your Host Machine](#connecting-to-mongodb-from-your-host-machine)
 - [CRUD Operations — PyMongo](#crud-operations--pymongo)
   - [Insert (PyMongo)](#insert-pymongo)
-  - [Sample Data Setup](#sample-data-setup)
+  - [Toy Dataset Setup — `sample.movie_toy`](#toy-dataset-setup--samplemovie_toy)
   - [Finding Documents](#finding-documents)
   - [Dot Notation for Nested Fields](#dot-notation-for-nested-fields)
   - [Deleting Documents](#deleting-documents)
@@ -70,13 +70,14 @@ Before starting the exercises, you'll need to restore the lab databases. Follow 
 
 1. **SSH into your MongoDB server:**
    ```bash
-   ssh username@192.168.122.61
+   ssh username@<IP_ADDRESS>
    ```
 
-2. **Install wget (if not already installed):**
+2. **Install wget and unzip (if not already installed):**
    ```bash
-   sudo yum install wget -y
+   sudo yum install wget unzip -y
    ```
+   `wget` downloads the archives; `unzip` extracts them in step 5. Neither is installed by default on a minimal server image.
 
 ### Download Lab Datasets
 
@@ -139,6 +140,7 @@ Before starting the exercises, you'll need to restore the lab databases. Follow 
   - `sample` database contains: inspections, stories, grades, companies, zips, posts
   - `labs` database contains: movies and other lab-specific collections
 - The lab instructions will clearly indicate which database and collection to use for each exercise.
+- **This module** does not query the restored collections. Every example and practice exercise below uses a small three-document collection called **`movie_toy`**, which you create yourself inside the `sample` database — see [Toy Dataset Setup](#toy-dataset-setup--samplemovie_toy). The restored `sample` and `labs` collections are used in later modules.
 
 ---
 
@@ -169,24 +171,26 @@ You can extract the timestamp from an ObjectId to determine when a document was 
 > Connect first from your Linux shell, then select a database:
 > ```bash
 > # Linux shell
-> mongosh --host <ip_address>
+> mongosh --host <IP_ADDRESS>
 > ```
 > ```js
 > // mongosh
-> use movies
+> use sample
 > ```
-> Your prompt will change to `movies>` once the database is selected.
+> Your prompt will change to `sample>` once the database is selected.
+>
+> We write to a collection named **`movie_toy`** so we never touch the restored collections. It does not exist yet — MongoDB creates it on the first insert.
 
 ### Insert
 
 ```js
-// mongosh — movies>
+// mongosh — sample>
 
 // Insert a single document (_id auto-generated)
-db.movies.insertOne({ "title": "Jaws" })
+db.movie_toy.insertOne({ "title": "Jaws" })
 
 // Insert multiple documents
-db.movies.insertMany([
+db.movie_toy.insertMany([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -201,8 +205,8 @@ If `_id` is not specified, MongoDB will generate one automatically. Providing a 
 - **Unordered**: Continues inserting remaining documents despite errors
 
 ```js
-// mongosh — movies>
-db.movies.insertMany([...], { ordered: false })
+// mongosh — sample>
+db.movie_toy.insertMany([...], { ordered: false })
 ```
 
 ---
@@ -252,14 +256,16 @@ Your shell prompt will show `(.venv)` when the environment is active. Always act
 from pymongo import MongoClient
 
 # Replace with your VM's IP address
-VM_IP_ADDRESS = "192.168.1.100"
+VM_IP_ADDRESS = "<IP_ADDRESS>"
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
-# Select database and collection
-db = client["movies"]
-movies_collection = db["movies"]
+# Select the sample database and the movie_toy collection
+db = client["sample"]
+movie_toy = db["movie_toy"]
 ```
+
+Every PyMongo example in this module connects to **`sample` → `movie_toy`**. If a snippet returns nothing, check these two names first.
 
 > Make sure your VM has `bindIp: 0.0.0.0` in `/etc/mongod.conf` and port 27017 open in the firewall (covered in Module 03).
 
@@ -274,20 +280,20 @@ From here on, all examples use PyMongo. The query operator syntax (`$gt`, `$or`,
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"
+VM_IP_ADDRESS = "<IP_ADDRESS>"
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
-db = client["movies"]
-movies_collection = db["movies"]
+db = client["sample"]
+movie_toy = db["movie_toy"]
 
 # Insert a single document
-result = movies_collection.insert_one({ "title": "Jaws" })
+result = movie_toy.insert_one({ "title": "Jaws" })
 print(result.inserted_id)  # auto-generated _id
 ```
 
 ```python
 # Insert multiple documents
-movies_collection.insert_many([
+movie_toy.insert_many([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -296,8 +302,8 @@ movies_collection.insert_many([
 
 ```python
 # Duplicate _id raises DuplicateKeyError
-movies_collection.insert_one({ "_id": "Star Wars" })  # Success
-movies_collection.insert_one({ "_id": "Star Wars" })  # DuplicateKeyError
+movie_toy.insert_one({ "_id": "Star Wars" })  # Success
+movie_toy.insert_one({ "_id": "Star Wars" })  # DuplicateKeyError
 ```
 
 For unordered inserts (continue past duplicates):
@@ -314,25 +320,29 @@ docs = [
 ]
 
 try:
-    movies_collection.insert_many(docs, ordered=False)
+    movie_toy.insert_many(docs, ordered=False)
 except BulkWriteError as e:
     print(e.details)
 ```
 
-### Sample Data Setup
+### Toy Dataset Setup — `sample.movie_toy`
 
-Before continuing, insert the full sample dataset that the remaining examples depend on. Run this from your host machine:
+Every example and practice exercise from here on depends on this three-document collection. It lives in the **`sample`** database under the collection name **`movie_toy`** — a scratch collection you own, separate from the collections you restored with `mongorestore`.
+
+Save this as `setup_movie_toy.py` and run it from your host machine. It is safe to re-run at any time: the `.drop()` only removes `movie_toy`, then rebuilds it.
 
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"
+VM_IP_ADDRESS = "<IP_ADDRESS>"
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
-movies_collection = client["movies"]["movies"]
 
-movies_collection.drop()
-movies_collection.insert_many([
+# Database: sample    Collection: movie_toy
+movie_toy = client["sample"]["movie_toy"]
+
+movie_toy.drop()
+movie_toy.insert_many([
   {
     "title": "Batman",
     "category": ["action", "adventure"],
@@ -355,24 +365,34 @@ movies_collection.insert_many([
     "rotten_tomatoes": 6.3
   }
 ])
+
+print(movie_toy.count_documents({}))   # should print 3
+```
+
+Verify it from mongosh as well:
+
+```js
+// mongosh
+use sample
+db.movie_toy.countDocuments()   // 3
 ```
 
 ### Finding Documents
 
 ```python
 # Returns all documents
-for doc in movies_collection.find():
+for doc in movie_toy.find():
     print(doc)
 
 # Filter by field value
-doc = movies_collection.find_one({ "title": "Batman" })
+doc = movie_toy.find_one({ "title": "Batman" })
 
 # Filter by array element (any match)
-for doc in movies_collection.find({ "category": "family" }):
+for doc in movie_toy.find({ "category": "family" }):
     print(doc)
 
 # Filter by exact array
-for doc in movies_collection.find({ "category": ["family", "comedy"] }):
+for doc in movie_toy.find({ "category": ["family", "comedy"] }):
     print(doc)
 ```
 
@@ -380,7 +400,7 @@ for doc in movies_collection.find({ "category": ["family", "comedy"] }):
 
 ```python
 # Query nested field using dot notation string
-for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movie_toy.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -388,17 +408,23 @@ for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
 
 ```python
 # Delete first matching document
-movies_collection.delete_one({ "category": "action" })
+movie_toy.delete_one({ "category": "action" })
 
 # Delete all matching documents
-result = movies_collection.delete_many({ "category": "action" })
+result = movie_toy.delete_many({ "category": "action" })
 print(result.deleted_count)
 
 # Drop the entire collection
-movies_collection.drop()
+movie_toy.drop()
+```
 
-# Drop the entire database
-client.drop_database("movies")
+> **These examples destroy your toy data.** Re-run `setup_movie_toy.py` before continuing, or the sections below will return empty results.
+
+Dropping a whole database uses `drop_database()`. Do **not** run this on `sample` — it would delete the collections you restored with `mongorestore`:
+
+```python
+# Syntax only — this deletes a database and everything in it
+client.drop_database("some_throwaway_db")
 ```
 
 ---
@@ -409,15 +435,15 @@ Specify which fields to include (`1`) or exclude (`0`) in the result.
 
 ```python
 # Include only title (plus _id by default)
-for doc in movies_collection.find({}, { "title": 1 }):
+for doc in movie_toy.find({}, { "title": 1 }):
     print(doc)
 
 # Exclude title
-for doc in movies_collection.find({}, { "title": 0 }):
+for doc in movie_toy.find({}, { "title": 0 }):
     print(doc)
 
 # Exclude _id explicitly
-for doc in movies_collection.find({}, { "title": 1, "_id": 0 }):
+for doc in movie_toy.find({}, { "title": 1, "_id": 0 }):
     print(doc)
 ```
 
@@ -433,15 +459,15 @@ for doc in movies_collection.find({}, { "title": 1, "_id": 0 }):
 
 ```python
 # Sort: 1 = ascending, -1 = descending
-for doc in movies_collection.find().sort("imdb_rating", -1):
+for doc in movie_toy.find().sort("imdb_rating", -1):
     print(doc)
 
 # Limit and skip
-for doc in movies_collection.find().skip(5).limit(5):
+for doc in movie_toy.find().skip(5).limit(5):
     print(doc)
 
 # Chained
-for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
+for doc in movie_toy.find().sort("title", 1).skip(5).limit(5):
     print(doc)
 ```
 
@@ -465,16 +491,16 @@ for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
 Query operator syntax is identical to mongosh — just Python dicts:
 
 ```python
-for doc in movies_collection.find({ "imdb_rating": { "$gte": 7 } }):
+for doc in movie_toy.find({ "imdb_rating": { "$gte": 7 } }):
     print(doc)
 
-for doc in movies_collection.find({ "category": { "$ne": "family" } }):
+for doc in movie_toy.find({ "category": { "$ne": "family" } }):
     print(doc)
 
-for doc in movies_collection.find({ "title": { "$in": ["Batman", "Godzilla"] } }):
+for doc in movie_toy.find({ "title": { "$in": ["Batman", "Godzilla"] } }):
     print(doc)
 
-for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movie_toy.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -488,13 +514,13 @@ for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
 | $nor     | Match none |
 
 ```python
-for doc in movies_collection.find({ "$or": [
+for doc in movie_toy.find({ "$or": [
     { "category": "sci-fi" },
     { "imdb_rating": { "$gte": 7 } }
 ] }):
     print(doc)
 
-for doc in movies_collection.find({ "$or": [
+for doc in movie_toy.find({ "$or": [
     { "category": "sci-fi", "imdb_rating": { "$gte": 8 } },
     { "category": "family", "imdb_rating": { "$gte": 7 } }
 ] }):
@@ -512,20 +538,22 @@ for doc in movies_collection.find({ "$or": [
 | $elemMatch  | Match at least one element with all conditions |
 
 ```python
-for doc in movies_collection.find({ "category": { "$size": 3 } }):
+for doc in movie_toy.find({ "category": { "$size": 3 } }):
     print(doc)
 
-for doc in movies_collection.find({ "category": { "$all": ["sci-fi", "action"] } }):
+for doc in movie_toy.find({ "category": { "$all": ["sci-fi", "action"] } }):
     print(doc)
 ```
 
 ### $elemMatch
 
-`$elemMatch` matches documents where at least one array element satisfies all conditions simultaneously. First set up the data:
+`$elemMatch` matches documents where at least one array element satisfies all conditions simultaneously. This needs an array of subdocuments, so we use a **second scratch collection**, `sample.locations_toy`, and leave `movie_toy` untouched:
 
 ```python
-movies_collection.drop()
-movies_collection.insert_many([
+locations_toy = client["sample"]["locations_toy"]
+
+locations_toy.drop()
+locations_toy.insert_many([
   {
     "title": "Raiders of the Lost Ark",
     "filming_locations": [
@@ -545,7 +573,7 @@ movies_collection.insert_many([
 ])
 
 # Finds only Hannibal — Florence in Italy, not South Carolina
-for doc in movies_collection.find({
+for doc in locations_toy.find({
     "filming_locations": {
         "$elemMatch": { "city": "Florence", "country": "Italy" }
     }
@@ -562,7 +590,7 @@ for doc in movies_collection.find({
 Replaces the entire document (except `_id`). Use with caution — all fields not in the replacement are removed.
 
 ```python
-movies_collection.replace_one(
+movie_toy.replace_one(
     { "title": "Batman" },
     { "imdb_rating": 7.7 }   # Batman now only has _id and imdb_rating
 )
@@ -573,12 +601,12 @@ movies_collection.replace_one(
 Modifies specific fields without replacing the whole document.
 
 ```python
-movies_collection.update_one(
+movie_toy.update_one(
     { "title": "Batman" },
     { "$set": { "imdb_rating": 7.7 } }
 )
 
-movies_collection.update_one(
+movie_toy.update_one(
     { "title": "Godzilla" },
     { "$set": { "box_office.budget": 1 } }
 )
@@ -589,7 +617,7 @@ movies_collection.update_one(
 Updates all matching documents.
 
 ```python
-movies_collection.update_many({}, { "$set": { "sequels": 0 } })
+movie_toy.update_many({}, { "$set": { "sequels": 0 } })
 ```
 
 ---
@@ -609,13 +637,13 @@ movies_collection.update_many({}, { "$set": { "sequels": 0 } })
 
 ```python
 # Increment Home Alone's budget by 5
-movies_collection.update_one(
+movie_toy.update_one(
     { "title": "Home Alone" },
     { "$inc": { "box_office.budget": 5 } }
 )
 
 # Set current date on all documents
-movies_collection.update_many({}, {
+movie_toy.update_many({}, {
     "$currentDate": { "release_date": { "$type": "date" } }
 })
 ```
@@ -624,13 +652,24 @@ movies_collection.update_many({}, {
 
 ## Practice Exercises
 
-Write Python scripts using PyMongo for each exercise. Connect to your VM's MongoDB instance.
+All exercises run against the **`sample`** database, collection **`movie_toy`**. Start every script with:
+
+```python
+from pymongo import MongoClient
+
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # your VM's IP address
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+movie_toy = client["sample"]["movie_toy"]
+```
+
+> **Re-run `setup_movie_toy.py` first.** The delete and update examples above modify the toy data. If `movie_toy.count_documents({})` is not 3, or the documents are missing `box_office`, re-seed before starting. Exercises 4–8 also change the data as you go, so re-seed whenever you want to start over.
 
 1. Find all sci-fi movies.
 2. Find either sci-fi or comedy movies.
 3. Find all movies that made a profit (gross > budget):
 ```python
-for doc in movies_collection.find({ "$expr": { "$gt": ["$box_office.gross", "$box_office.budget"] } }):
+for doc in movie_toy.find({ "$expr": { "$gt": ["$box_office.gross", "$box_office.budget"] } }):
     print(doc)
 ```
 4. Increment Batman's IMDB rating by 1.
@@ -696,22 +735,25 @@ Work through this checklist:
 
 ### Q: `DuplicateKeyError` when inserting
 
-You're inserting a document with an `_id` that already exists in the collection. Either omit `_id` (MongoDB will generate one), use a different value, or drop the collection first with `movies_collection.drop()`.
+You're inserting a document with an `_id` that already exists in the collection. Either omit `_id` (MongoDB will generate one), use a different value, or drop the collection first with `movie_toy.drop()`.
 
 ---
 
 ### Q: I inserted data in Python but can't see it in mongosh (or vice versa)
 
 Both are connected to the same server, so the data should be the same. Check:
-- Are you looking at the same **database** and **collection** name?
-- In mongosh, run `use <database_name>` before querying.
-- In Python, confirm `client["db_name"]["collection_name"]` matches what you expect.
+- Are you looking at the same **database** and **collection** name? For this module both should be `sample` and `movie_toy`.
+- In mongosh, run `use sample` before querying `db.movie_toy`.
+- In Python, confirm you have `client["sample"]["movie_toy"]`.
 
 ---
 
 ### Q: `find()` returns an empty cursor even though I just inserted data
 
-Most likely a wrong database or collection name. Python string comparisons are case-sensitive — `"Movies"` and `"movies"` are different collections. Double-check both names.
+Two common causes:
+
+1. **Wrong database or collection name.** Names are case-sensitive — `"Movie_Toy"` and `"movie_toy"` are different collections, and MongoDB silently creates a new empty one instead of erroring.
+2. **You ran a destructive example.** The delete, drop, and update sections earlier in this module modify `movie_toy`. Re-run `setup_movie_toy.py` and confirm `movie_toy.count_documents({})` returns 3.
 
 ---
 
