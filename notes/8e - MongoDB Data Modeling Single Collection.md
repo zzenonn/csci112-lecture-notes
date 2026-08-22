@@ -49,7 +49,7 @@ Connect to your MongoDB instance:
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client        = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db            = client["bookstore"]
@@ -319,7 +319,7 @@ The script below is the entire walkthrough in one file — copy-paste it into a 
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client        = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db            = client["bookstore"]

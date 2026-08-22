@@ -126,10 +126,10 @@ Look for the IP address under your network interface (usually `eth0` or `enp0s3`
 From your host machine (Windows/Mac/Linux), you can now connect to your VM:
 
 ```bash
-ssh username@<vm_ip_address>
+ssh username@<IP_ADDRESS>
 ```
 
-Replace `username` with your VM username and `<vm_ip_address>` with the IP address you found above.
+Replace `username` with your VM username and `<IP_ADDRESS>` with the IP address you found above.
 
 #### Install and Configure Nano Text Editor
 
@@ -243,25 +243,25 @@ Logs include:
 ### Connect to MongoDB Server Using `mongosh`
 
 ```bash
-mongosh --host <ip_address>
+mongosh --host <IP_ADDRESS>
 ```
 
 Or using connection string format:
 
 ```bash
-mongosh "mongodb://<ip_address>/"
+mongosh "mongodb://<IP_ADDRESS>/"
 ```
 
 To connect to a specific database:
 
 ```bash
-mongosh --host <ip_address> <database_name>
+mongosh --host <IP_ADDRESS> <database_name>
 ```
 
 Or:
 
 ```bash
-mongosh "mongodb://<ip_address>/<database_name>"
+mongosh "mongodb://<IP_ADDRESS>/<database_name>"
 ```
 
 ### Switch Databases in Mongo Shell

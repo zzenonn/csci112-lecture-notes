@@ -54,7 +54,7 @@ Key fields for indexing demos:
 ```python
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["labs"]
@@ -594,7 +594,7 @@ Copy-paste this script after setting `VM_IP_ADDRESS`. It runs every demo in this
 import pprint
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["labs"]

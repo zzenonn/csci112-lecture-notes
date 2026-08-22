@@ -259,8 +259,7 @@ Your shell prompt will show `(.venv)` when the environment is active. Always act
 ```python
 from pymongo import MongoClient
 
-# Replace with your VM's IP address
-VM_IP_ADDRESS = "<IP_ADDRESS>"
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
@@ -284,7 +283,7 @@ From here on, all examples use PyMongo. The query operator syntax (`$gt`, `$or`,
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "<IP_ADDRESS>"
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db = client["sample"]
@@ -338,7 +337,7 @@ Save this as `setup_movie_toy.py` and run it from your host machine. It is safe 
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "<IP_ADDRESS>"
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
@@ -671,7 +670,7 @@ Create a new file called **`setup_movie_toy.py`**, paste the script below in ful
 # setup_movie_toy.py — creates sample.movie_toy with three documents
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "<IP_ADDRESS>"   # your VM's IP address
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
@@ -730,7 +729,7 @@ Create a **second** file, `exercises.py`, so re-running the setup never overwrit
 # exercises.py
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "<IP_ADDRESS>"   # your VM's IP address
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 

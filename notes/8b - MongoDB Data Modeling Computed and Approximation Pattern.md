@@ -18,7 +18,7 @@ All examples use **PyMongo** running on your laptop, connecting to `mongod` on a
 ```python
 from pymongo import MongoClient, ReturnDocument
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
@@ -317,7 +317,7 @@ import random
 import time
 from pymongo import MongoClient, ReturnDocument
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 db     = client["bookstore"]
