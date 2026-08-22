@@ -4,3 +4,4 @@ node_modules/
 slides/*/dist/
 slides/**/dist/
 *.ppm
+slides/**/screenshots/
