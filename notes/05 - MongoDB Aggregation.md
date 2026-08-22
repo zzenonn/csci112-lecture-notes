@@ -69,9 +69,10 @@ MongoDB's aggregation pipeline is a specific implementation: documents enter, fl
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+# Database: movies    Collection: movies_small
 db = client["movies"]
 movies_collection = db["movies_small"]
 
@@ -99,9 +100,10 @@ Run this script from your host machine to create the `movies_small` collection u
 ```python
 from pymongo import MongoClient
 
-VM_IP_ADDRESS = "192.168.1.100"
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+# Database: movies    Collection: movies_small
 db = client["movies"]
 movies_collection = db["movies_small"]
 
@@ -327,11 +329,12 @@ movies_collection.aggregate([
 
 ### Data cleaning example
 
-Group the larger `movies` collection (from the lab dataset) by number of directors, compute average Metacritic score. This collection has `directors` (array) and `metacritic` fields not present in `movies_small`.
+Group the larger `labs.movies` collection by number of directors, compute average Metacritic score. This is the 44,488-document collection restored by `mongorestore` in [Module 04](https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md#lab-data-setup) — it lives in the **`labs`** database, not the `movies` database used above, and it has `directors` (array) and `metacritic` fields that `movies_small` does not.
 
 ```python
-# Re-bind to the lab movies collection for this example
-movies_full = db["movies"]
+# Different database: the restored lab dataset lives in labs, not movies
+# Database: labs    Collection: movies
+movies_full = client["labs"]["movies"]
 
 movies_full.aggregate([
     { "$group": {
