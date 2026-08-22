@@ -359,10 +359,10 @@ Once mongos is running and shards are registered, enable sharding:
 
 ```javascript
 // Connect to mongos, then:
-use sample
+use labs
 db.grades.createIndex({ "class_id": "hashed" }, { background: true })
-sh.enableSharding("sample")
-sh.shardCollection("sample.grades", { "class_id": "hashed" }, false, { numInitialChunks: 2 })
+sh.enableSharding("labs")
+sh.shardCollection("labs.grades", { "class_id": "hashed" }, false, { numInitialChunks: 2 })
 
 // Verify distribution
 db.grades.getShardDistribution()

@@ -82,14 +82,14 @@ layout: section
 # Insert
 
 ```javascript
-// Connect to the MongoDB shell
-mongosh "mongodb://<vm_ip_address>/movies"
+// Connect to the MongoDB shell — database: sample
+mongosh "mongodb://<vm_ip_address>/sample"
 
 // Insert a single document (_id auto-generated)
-db.movies.insertOne({ "title": "Jaws" })
+db.movie_toy.insertOne({ "title": "Jaws" })
 
 // Insert multiple documents
-db.movies.insertMany([
+db.movie_toy.insertMany([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -170,9 +170,9 @@ VM_IP_ADDRESS = "192.168.1.100"   # replace with your VM's IP
 # Connect to your VM's MongoDB instance
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
-# Select database and collection
-db = client["movies"]
-movies_collection = db["movies"]
+# Database: sample    Collection: movie_toy
+db = client["sample"]
+movie_toy = db["movie_toy"]
 ```
 
 <div style="margin-top:1rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:0.75rem 1rem; border-radius:0 6px 6px 0; font-size:0.9rem;">
@@ -189,15 +189,15 @@ from pymongo import MongoClient
 VM_IP_ADDRESS = "192.168.1.100"
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
-db = client["movies"]
-movies_collection = db["movies"]
+db = client["sample"]
+movie_toy = db["movie_toy"]
 
 # Insert a single document (_id auto-generated)
-result = movies_collection.insert_one({ "title": "Jaws" })
+result = movie_toy.insert_one({ "title": "Jaws" })
 print(result.inserted_id)
 
 # Insert multiple documents
-movies_collection.insert_many([
+movie_toy.insert_many([
   { "title": "Batman", "category": ["action", "adventure"] },
   { "title": "Godzilla", "category": ["action", "sci-fi"] },
   { "title": "Home Alone", "category": ["family", "comedy"] }
@@ -206,12 +206,12 @@ movies_collection.insert_many([
 
 ---
 
-# Sample Data Setup
+# Toy Dataset Setup
 
-Before running the following examples, insert the sample `movies` collection from the notes.
+Every example from here on reads the three-document `sample.movie_toy` collection.
 
 <div style="margin-top:1.5rem; background:#f0f9ff; border-left:4px solid #00b0f0; padding:1rem 1.25rem; border-radius:0 6px 6px 0; font-size:0.95rem;">
-  Run the <strong>Sample Data Setup</strong> script in <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md#sample-data-setup">notes/04 — MongoDB Data Structures</a> before proceeding.
+  Run the <strong>Toy Dataset Setup</strong> script in <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md#toy-dataset-setup--samplemovie_toy">notes/04 — MongoDB Data Structures</a> before proceeding. It is safe to re-run at any time.
 </div>
 
 ---
@@ -220,18 +220,18 @@ Before running the following examples, insert the sample `movies` collection fro
 
 ```python
 # All documents
-for doc in movies_collection.find():
+for doc in movie_toy.find():
     print(doc)
 
 # Filter by field value
-doc = movies_collection.find_one({ "title": "Batman" })
+doc = movie_toy.find_one({ "title": "Batman" })
 
 # Filter by array element (any match)
-for doc in movies_collection.find({ "category": "family" }):
+for doc in movie_toy.find({ "category": "family" }):
     print(doc)
 
 # Nested field using dot notation
-for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
+for doc in movie_toy.find({ "box_office.gross": { "$gt": 50 } }):
     print(doc)
 ```
 
@@ -241,18 +241,22 @@ for doc in movies_collection.find({ "box_office.gross": { "$gt": 50 } }):
 
 ```python
 # Delete first matching document
-movies_collection.delete_one({ "category": "action" })
+movie_toy.delete_one({ "category": "action" })
 
 # Delete all matching documents
-result = movies_collection.delete_many({ "category": "action" })
+result = movie_toy.delete_many({ "category": "action" })
 print(result.deleted_count)
 
 # Drop the entire collection
-movies_collection.drop()
+movie_toy.drop()
 
-# Drop the entire database
-client.drop_database("movies")
+# Drop a whole database — never run this on sample
+client.drop_database("some_throwaway_db")
 ```
+
+<div style="margin-top:0.75rem; font-size:0.85rem; color:#666;">
+  These examples destroy your toy data — re-run <code>setup_movie_toy.py</code> before continuing.
+</div>
 
 ---
 
@@ -260,19 +264,19 @@ client.drop_database("movies")
 
 ```python
 # replace_one — replaces entire document (keeps _id)
-movies_collection.replace_one(
+movie_toy.replace_one(
     { "title": "Batman" },
     { "imdb_rating": 7.7 }
 )
 
 # update_one — modifies specific fields only
-movies_collection.update_one(
+movie_toy.update_one(
     { "title": "Batman" },
     { "$set": { "imdb_rating": 7.7 } }
 )
 
 # update_many — update all matching documents
-movies_collection.update_many({}, { "$set": { "sequels": 0 } })
+movie_toy.update_many({}, { "$set": { "sequels": 0 } })
 ```
 
 ---
@@ -301,13 +305,13 @@ movies_collection.update_many({}, { "$set": { "sequels": 0 } })
 
 ```python
 # Increment Home Alone's budget by 5
-movies_collection.update_one(
+movie_toy.update_one(
     { "title": "Home Alone" },
     { "$inc": { "box_office.budget": 5 } }
 )
 
 # Set current date on all docs
-movies_collection.update_many({}, {
+movie_toy.update_many({}, {
     "$currentDate": {
         "release_date": { "$type": "date" }
     }
@@ -331,15 +335,15 @@ Control which fields are returned — `1` to include, `0` to exclude:
 
 ```python
 # Include only title (plus _id by default)
-for doc in movies_collection.find({}, { "title": 1 }):
+for doc in movie_toy.find({}, { "title": 1 }):
     print(doc)
 
 # Exclude _id explicitly
-for doc in movies_collection.find({}, { "title": 1, "_id": 0 }):
+for doc in movie_toy.find({}, { "title": 1, "_id": 0 }):
     print(doc)
 
 # Exclude a field
-for doc in movies_collection.find({}, { "rotten_tomatoes": 0 }):
+for doc in movie_toy.find({}, { "rotten_tomatoes": 0 }):
     print(doc)
 ```
 
@@ -355,15 +359,15 @@ for doc in movies_collection.find({}, { "rotten_tomatoes": 0 }):
 
 ```python
 # Sort: 1 = ascending, -1 = descending
-for doc in movies_collection.find().sort("imdb_rating", -1):
+for doc in movie_toy.find().sort("imdb_rating", -1):
     print(doc)
 
 # Limit and skip
-for doc in movies_collection.find().skip(5).limit(5):
+for doc in movie_toy.find().skip(5).limit(5):
     print(doc)
 
 # Chained
-for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
+for doc in movie_toy.find().sort("title", 1).skip(5).limit(5):
     print(doc)
 ```
 
@@ -379,9 +383,9 @@ for doc in movies_collection.find().sort("title", 1).skip(5).limit(5):
 | `$in` / `$nin` | In array / not in array |
 
 ```python
-movies_collection.find({ "imdb_rating": { "$gte": 7 } })
-movies_collection.find({ "box_office.gross": { "$gt": 50 } })
-movies_collection.find({ "title": { "$in": ["Batman", "Godzilla"] } })
+movie_toy.find({ "imdb_rating": { "$gte": 7 } })
+movie_toy.find({ "box_office.gross": { "$gt": 50 } })
+movie_toy.find({ "title": { "$in": ["Batman", "Godzilla"] } })
 ```
 
 ---
@@ -396,7 +400,7 @@ movies_collection.find({ "title": { "$in": ["Batman", "Godzilla"] } })
 | `$nor` | Match none |
 
 ```python
-for doc in movies_collection.find({ "$or": [
+for doc in movie_toy.find({ "$or": [
     { "category": "sci-fi" },
     { "imdb_rating": { "$gte": 7 } }
 ] }):
@@ -414,19 +418,17 @@ for doc in movies_collection.find({ "$or": [
 | `$elemMatch` | At least one element matches all conditions |
 
 ```python
-movies_collection.find({ "category": { "$size": 3 } })
-movies_collection.find({ "category": { "$all": ["sci-fi", "action"] } })
+movie_toy.find({ "category": { "$size": 3 } })
+movie_toy.find({ "category": { "$all": ["sci-fi", "action"] } })
 
-# $elemMatch on nested documents
-movies_collection.find({
-    "filming_locations": {
-        "$elemMatch": { "city": "Florence", "country": "Italy" }
-    }
+# $elemMatch needs an array of subdocuments — sample.locations_toy
+locations_toy.find({
+    "filming_locations": { "$elemMatch": { "city": "Florence", "country": "Italy" } }
 })
 ```
 
 <div style="margin-top:0.75rem; font-size:0.85rem; color:#666;">
-  Full sample data and $elemMatch setup: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md">notes/04 — MongoDB Data Structures</a>
+  Setup for <code>sample.locations_toy</code>: <a href="https://github.com/zzenonn/csci112-lecture-notes/blob/main/notes/04%20-%20MongoDB%20Data%20Structures.md#elemmatch">notes/04 — MongoDB Data Structures</a>
 </div>
 
 ---
