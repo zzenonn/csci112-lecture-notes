@@ -41,6 +41,10 @@ CSCI 112 / 212 - Contemporary Databases
   - [update_many()](#update_many)
 - [Other Update Operators](#other-update-operators)
 - [Practice Exercises](#practice-exercises)
+  - [Step 1 — Set up the data](#step-1--set-up-the-data)
+  - [Step 2 — Write your exercise script](#step-2--write-your-exercise-script)
+  - [Step 3 — The exercises](#step-3--the-exercises)
+- [Troubleshooting FAQ](#troubleshooting-faq)
 - [Summary](#summary)
 
 ## Overview
@@ -652,18 +656,93 @@ movie_toy.update_many({}, {
 
 ## Practice Exercises
 
-All exercises run against the **`sample`** database, collection **`movie_toy`**. Start every script with:
+All exercises run against:
+
+- **Database:** `sample`
+- **Collection:** `movie_toy`
+
+### Step 1 — Set up the data
+
+The examples earlier in this module deleted and modified the toy data, so start from a clean copy.
+
+Create a new file called **`setup_movie_toy.py`**, paste the script below in full, change `<IP_ADDRESS>` to your VM's IP address, and run it with `python setup_movie_toy.py`. Re-run it any time you want to start the exercises over — it drops `movie_toy` and rebuilds it from scratch.
 
 ```python
+# setup_movie_toy.py — creates sample.movie_toy with three documents
 from pymongo import MongoClient
 
 VM_IP_ADDRESS = "<IP_ADDRESS>"   # your VM's IP address
 
 client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+
+# Database: sample    Collection: movie_toy
 movie_toy = client["sample"]["movie_toy"]
+
+# Remove any existing movie_toy documents so we start clean.
+# This only affects movie_toy — the restored collections are untouched.
+movie_toy.drop()
+
+movie_toy.insert_many([
+    {
+        "title": "Batman",
+        "category": ["action", "adventure"],
+        "imdb_rating": 7.6,
+        "box_office": {"budget": 35, "gross": 70},
+        "rotten_tomatoes": 7.1,
+    },
+    {
+        "title": "Godzilla",
+        "category": ["action", "adventure", "sci-fi"],
+        "imdb_rating": 6.6,
+        "box_office": {"budget": 70, "gross": 20},
+        "rotten_tomatoes": 8.0,
+    },
+    {
+        "title": "Home Alone",
+        "category": ["family", "comedy"],
+        "imdb_rating": 7.4,
+        "box_office": {"budget": 10, "gross": 15},
+        "rotten_tomatoes": 6.3,
+    },
+])
+
+print("movie_toy document count:", movie_toy.count_documents({}))
+for doc in movie_toy.find({}, {"_id": 0, "title": 1, "box_office": 1}):
+    print(doc)
 ```
 
-> **Re-run `setup_movie_toy.py` first.** The delete and update examples above modify the toy data. If `movie_toy.count_documents({})` is not 3, or the documents are missing `box_office`, re-seed before starting. Exercises 4–8 also change the data as you go, so re-seed whenever you want to start over.
+Expected output:
+
+```
+movie_toy document count: 3
+{'title': 'Batman', 'box_office': {'budget': 35, 'gross': 70}}
+{'title': 'Godzilla', 'box_office': {'budget': 70, 'gross': 20}}
+{'title': 'Home Alone', 'box_office': {'budget': 10, 'gross': 15}}
+```
+
+If you see anything else — a count that is not 3, or documents missing `box_office` — do not start the exercises. Fix the setup first; see the [Troubleshooting FAQ](#troubleshooting-faq).
+
+### Step 2 — Write your exercise script
+
+Create a **second** file, `exercises.py`, so re-running the setup never overwrites your work. Start it with these lines, which connect to the same database and collection:
+
+```python
+# exercises.py
+from pymongo import MongoClient
+
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # your VM's IP address
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+
+# Database: sample    Collection: movie_toy
+movie_toy = client["sample"]["movie_toy"]
+
+# Your answers below.
+```
+
+### Step 3 — The exercises
+
+Exercises 4–8 change the data, so do them in order. Re-run `setup_movie_toy.py` to reset.
 
 1. Find all sci-fi movies.
 2. Find either sci-fi or comedy movies.
