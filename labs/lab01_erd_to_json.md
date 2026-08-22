@@ -3,6 +3,11 @@
 ## Objective
 Convert relational database designs (ERD) into NoSQL document structures by transforming normalized data into **a single embedded MongoDB document per order**. All related entities (Customer, Order, OrderItem, Product) should be consolidated into one document
 
+## Prerequisites
+- Access to MongoDB server with the `labs` database
+- Collection: `lab1` (you create it — MongoDB makes it on your first insert)
+- Basic understanding of relational databases, ERDs, and primary/foreign key concepts
+
 ## JSON Review
 
 JSON (JavaScript Object Notation) uses key-value pairs to store data:
@@ -126,6 +131,13 @@ Create a single MongoDB document per order with embedded data:
 Transform each order below into the target embedded document structure.
 
 ### 2. Insert Documents  
+Work in the **`labs`** database, collection **`lab1`**. Switch to it first, then insert one
+document per order:
+
+```js
+use labs
+```
+
 Use `db.lab1.insertOne({...})` for each document.
 
 ## Order Data to Convert
@@ -174,6 +186,9 @@ Submit **only**:
 ```javascript
 // Lab 1 Solution - ERD to JSON Conversion
 // Students: [Student1 Name], [Student2 Name]
+
+// Database: labs    Collection: lab1
+use labs
 
 // Order 1
 db.lab1.insertOne({

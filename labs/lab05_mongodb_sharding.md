@@ -140,19 +140,19 @@ db.adminCommand({ listShards: 1 })
 
 ### 7. Enable Sharding on a Collection
 
-While connected to mongos, shard the `grades` collection by `class_id`:
+While connected to mongos, shard the `labs.grades` collection by `class_id`:
 
 ```javascript
-use sample
+use labs
 db.grades.createIndex({ "class_id": "hashed" }, { background: true })
-sh.enableSharding("sample")
-sh.shardCollection("sample.grades", { "class_id": "hashed" }, false, { numInitialChunks: 2 })
+sh.enableSharding("labs")
+sh.shardCollection("labs.grades", { "class_id": "hashed" }, false, { numInitialChunks: 2 })
 ```
 
 Import data and verify distribution:
 
 ```bash
-mongoimport -d sample -c grades --host <mongos_ip> grades.json
+mongoimport -d labs -c grades --host <mongos_ip> grades.json
 ```
 
 ```javascript
