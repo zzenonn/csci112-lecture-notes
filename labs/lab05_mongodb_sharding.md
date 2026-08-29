@@ -10,6 +10,12 @@ CSCI 112 / 212 - Contemporary Databases
 
 This lab walks you through deploying a minimal sharded and replicated MongoDB cluster on cloud VMs (GCP, AWS, or any provider). The goal is to understand how the components fit together — not to build a production-grade system.
 
+> **Why this lab is `mongosh`, not PyMongo.** Labs 1–3 are PyMongo labs because they do
+> application work: reading and writing documents. This lab does *cluster administration* —
+> `rs.initiate()`, `sh.addShard()`, `sh.status()` — which is shell work run against a specific
+> node. Every command below is typed into `mongosh` after SSHing into the instance named in the
+> step.
+
 **Cluster topology for this lab:**
 
 | Component | Count | Port |

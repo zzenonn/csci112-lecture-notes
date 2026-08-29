@@ -1,26 +1,81 @@
 # Lab 3: MongoDB Aggregation Pipeline
 
 ## Objective
-Practice MongoDB aggregation pipeline operations to perform complex data analysis and transformations using various collections in the `labs` database. This lab focuses on applying aggregation stages like `$match`, `$group`, `$sort`, `$unwind`, and `$bucket` to extract meaningful insights from real-world datasets.
+Practice MongoDB aggregation pipeline operations to perform complex data analysis and transformations using various collections in the `labs` database. This lab focuses on applying aggregation stages like `$match`, `$group`, `$sort`, `$unwind`, and `$bucket` to extract meaningful insights from real-world datasets using **PyMongo**.
 
 ## Prerequisites
-- Access to MongoDB server with `labs` database
-- Collections: `posts`, `inspections`, `companies`, `customers`
-- Basic understanding of MongoDB aggregation framework
+- Python 3.x with PyMongo installed — see [PyMongo Setup](../notes/04%20-%20MongoDB%20Data%20Structures.md#pymongo-setup) in Notes 04
+- Access to a MongoDB server, reachable from your host machine on port 27017
+- **Database: `labs`** — collections `posts`, `inspections`, `companies`, `customers`
+- The `labs` datasets restored with `mongorestore` — see [Lab Data Setup](../notes/04%20-%20MongoDB%20Data%20Structures.md#lab-data-setup) in Notes 04
+- Basic understanding of the MongoDB aggregation framework — see [Notes 05 — MongoDB Aggregation](../notes/05%20-%20MongoDB%20Aggregation.md)
 
 ## Database Setup
-Connect to your MongoDB instance and switch to the labs database:
-```js
-use labs
-show collections
+
+Every collection in this lab lives in the **`labs`** database. Start your script with this
+preamble:
+
+```python
+from pymongo import MongoClient
+
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+
+# Database: labs
+labs = client["labs"]
+
+posts       = labs["posts"]
+inspections = labs["inspections"]
+companies   = labs["companies"]
+customers   = labs["customers"]
+```
+
+### Confirm your data is there
+
+Run this before you start. If any count is 0, your `mongorestore` did not complete and no
+pipeline below will return anything:
+
+```python
+for name in ["posts", "inspections", "companies", "customers"]:
+    count = labs[name].count_documents({})
+    print(f"{name:12} {count}")
+```
+
+Expected output:
+
+```
+posts        1000
+inspections  81047
+companies    18801
+customers    1000
 ```
 
 ## Aggregation Pipeline Review
 
+In PyMongo, a pipeline is a **Python list of dicts** — one dict per stage. The stage names and
+operators are the same as in `mongosh`; only the syntax around them is Python:
+
+```python
+# A pipeline is a list; each stage is a dict
+pipeline = [
+    { "$match": { "accountType": "gold" } },
+    { "$group": { "_id": "$gender", "count": { "$sum": 1 } } },
+    { "$sort":  { "count": -1 } }
+]
+
+for doc in customers.aggregate(pipeline):
+    print(doc)
+```
+
+`aggregate()` returns a **cursor**, so iterate over it (or wrap it in `list()`) to see results.
+Note the two different uses of `$`: `"$sum"` names an *operator*, while `"$gender"` means
+*the value of the `gender` field*.
+
 ### Core Pipeline Stages
-- `$match`: Filter documents (like find())
+- `$match`: Filter documents (like `find()`) — put it first to shrink the pipeline early
 - `$group`: Group documents and perform calculations
-- `$sort`: Sort documents by specified fields
+- `$sort`: Sort documents by specified fields (`1` ascending, `-1` descending)
 - `$project`: Include/exclude fields or create new ones
 - `$unwind`: Deconstruct array fields into separate documents
 - `$bucket`: Group documents into buckets based on ranges
@@ -33,71 +88,105 @@ show collections
 - `$max`, `$min`: Find maximum/minimum values
 - `$push`: Create arrays from grouped values
 - `$addToSet`: Create arrays with unique values
+- `$size`: Length of an array — pair it with `$ifNull` if the field may be missing
 
 ## Lab Tasks
+
+All four tasks run against the **`labs`** database using the variables bound in the preamble above.
 
 ### Task 1: Top 10 Most Common Tags (20 points)
 **Requirement**: In the `posts` collection, find the top 10 most common tags.
 
-```js
-// Your aggregation pipeline here
+**Note**: `tags` is an array, so counting it directly counts documents, not tags.
+
+```python
+# Collection: labs.posts
+# Your aggregation pipeline here
 ```
 
 ### Task 2: Failed Inspections by Zip Code in Jamaica (15 points)
 **Requirement**: Find how many inspections in Jamaica failed per zip code, sort from the most failures to the least failures.
 
-```js
-// Your aggregation pipeline here
+**Note**: city and zip live inside the `address` subdocument, and city names are stored in
+upper case.
+
+```python
+# Collection: labs.inspections
+# Your aggregation pipeline here
 ```
 
 ### Task 3: Top 10 US Companies with Most Competitors (10 points)
 **Requirement**: In the `companies` collection, find the top 10 companies with an office in the US with the most competitors.
 
-```js
-// Your aggregation pipeline here
+**Note**: `offices` and `competitions` are both arrays of subdocuments. Check what value the
+office country field actually holds before matching on it.
+
+```python
+# Collection: labs.companies
+# Your aggregation pipeline here
 ```
 
 ### Task 4: Customer Demographics by Age Groups (5 points)
 **Requirement**: In the `customers` collection, find the number of silver and gold customers based on the following age groups: under 18, 18-64, 65 and above.
 
-**Hint**: Use the `$bucket` operator to group customers by age ranges.
+**Hint**: Use the `$bucket` operator to group customers by age ranges. `$bucket` omits empty
+buckets from its output, so do not be surprised if a range you defined does not appear.
 
-```js
-// Your aggregation pipeline here
+```python
+# Collection: labs.customers
+# Your aggregation pipeline here
 ```
 
 ## Deliverables
 
 Submit **only**:
-- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-AggregationPipeline.js**
+- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-AggregationPipeline.py**
 
 **File format example**:
-```javascript
-/*
+```python
+"""
 Certificate of Authorship:
-I have not discussed the JavaScript language code in my program with anyone 
+I have not discussed the Python language code in my program with anyone
 other than my instructor or the teaching assistants assigned to this course.
-I have not used JavaScript language code obtained from another student, 
+I have not used Python language code obtained from another student,
 or any other unauthorized source, either modified or unmodified.
-If any JavaScript language code or documentation used in my program 
-was obtained from another source, such as a textbook or course notes, 
+If any Python language code or documentation used in my program
+was obtained from another source, such as a textbook or course notes,
 that has been clearly noted with a proper citation in the comments of my program.
-*/
+"""
 
-// Lab 3 Solution - MongoDB Aggregation Pipeline
-// Students: [Student1 Name], [Student2 Name]
+# Lab 3 Solution - MongoDB Aggregation Pipeline
+# Students: [Student1 Name], [Student2 Name]
 
-// Task 1: Top 10 most common tags in posts (20 points)
-// Your aggregation pipeline here
+from pymongo import MongoClient
 
-// Task 2: Failed inspections by zip code in Jamaica (15 points)
-// Your aggregation pipeline here
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
-// Task 3: Top 10 US companies with most competitors (10 points)
-// Your aggregation pipeline here
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
-// Task 4: Silver and gold customers by age groups (5 points)
-// Your aggregation pipeline here
+# Database: labs
+labs = client["labs"]
+
+posts       = labs["posts"]
+inspections = labs["inspections"]
+companies   = labs["companies"]
+customers   = labs["customers"]
+
+# Task 1: Top 10 most common tags in posts (20 points)
+# Collection: labs.posts
+# Your aggregation pipeline here
+
+# Task 2: Failed inspections by zip code in Jamaica (15 points)
+# Collection: labs.inspections
+# Your aggregation pipeline here
+
+# Task 3: Top 10 US companies with most competitors (10 points)
+# Collection: labs.companies
+# Your aggregation pipeline here
+
+# Task 4: Silver and gold customers by age groups (5 points)
+# Collection: labs.customers
+# Your aggregation pipeline here
 ```
 
 ## Grading
@@ -108,3 +197,9 @@ that has been clearly noted with a proper citation in the comments of my program
 - Task 2: Failed inspections by zip code (15 points)
 - Task 3: Top 10 US companies with most competitors (10 points)
 - Task 4: Customer demographics by age groups (5 points)
+
+## Notes
+- Use PyMongo from your host machine, not `mongosh`
+- Print your results — `aggregate()` returns a cursor and shows nothing on its own
+- All four tasks are read-only; nothing in this lab modifies the restored data
+- Do not name your script `pymongo.py` or `bson.py`; Python will import your file instead of the driver

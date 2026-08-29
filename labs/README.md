@@ -2,11 +2,33 @@
 
 This directory contains hands-on laboratory exercises designed to provide practical experience with NoSQL database systems and contemporary data management techniques.
 
+## Tooling
+
+Labs 1–3 are **PyMongo** labs: you write a Python script on your host machine and it connects to
+`mongod` on your VM over the network. Every one of them opens with the same preamble, so set up a
+virtual environment once — see [PyMongo Setup](../notes/04%20-%20MongoDB%20Data%20Structures.md#pymongo-setup)
+in Notes 04 — and reuse it:
+
+```python
+from pymongo import MongoClient
+
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+
+# Database: labs
+labs = client["labs"]
+```
+
+Lab 4 uses **boto3** against DynamoDB. Lab 5 is the exception: it stays in **`mongosh`**, because
+cluster administration (`rs.initiate()`, `sh.addShard()`, `sh.status()`) is shell work, not
+application work. Submitted deliverables are `.py` files for labs 1–4.
+
 ## Database Convention
 
-All MongoDB labs read and write the **`labs`** database. Every lab that touches MongoDB
-starts with `use labs`, and the collections it needs are listed in that lab's
-**Prerequisites** section. The `labs` datasets are restored by the `mongorestore` steps in
+All MongoDB labs read and write the **`labs`** database. The collections each lab needs are listed
+in its **Prerequisites** section, and every lab names its database and collection in a comment
+above the lookup. The `labs` datasets are restored by the `mongorestore` steps in
 [notes/04 — MongoDB Data Structures](../notes/04%20-%20MongoDB%20Data%20Structures.md#lab-data-setup).
 
 The `sample` database is used only for scratch collections in the lecture notes — never for lab deliverables.
@@ -14,36 +36,36 @@ The `sample` database is used only for scratch collections in the lecture notes 
 ## Available Labs
 
 ### [Lab 1: Intro to NoSQL - From ERD to JSON](lab01_erd_to_json.md)
-**Focus**: Document Database Fundamentals (MongoDB)
+**Focus**: Document Database Fundamentals (MongoDB / PyMongo)
 - Convert relational database designs (ERD) to NoSQL document structures
-- Learn JSON syntax and document embedding strategies
-- Practice MongoDB shell operations and data insertion
+- Learn JSON syntax, how it maps onto Python dicts, and document embedding strategies
+- Practice `insert_one()` and verification with PyMongo
 - Understand the differences between normalized relational data and embedded documents
 
 **Database / collections**: `labs` → `lab1` (you create it)
-**Prerequisites**: Basic understanding of relational databases, ERDs, and primary/foreign key concepts
+**Prerequisites**: Python 3.x with PyMongo; basic understanding of relational databases, ERDs, and primary/foreign key concepts
 **Duration**: 2-3 hours
 **Points**: 30 points
 
 ### [Lab 2: MongoDB Query Operations](lab02_mongodb_queries.md)
-**Focus**: Query and Update Operators (MongoDB)
+**Focus**: Query and Update Operators (MongoDB / PyMongo)
 - Apply comparison operators (`$gt`, `$lt`, `$in`) and logical operators (`$and`, `$or`, `$nor`)
 - Query nested fields and arrays across several real-world datasets
 - Perform bulk and conditional updates with `$set` and `$inc`
 
 **Database / collections**: `labs` → `grades`, `posts`, `stories`, `customers`, `inspections`
-**Prerequisites**: [Notes 04 — MongoDB Data Structures](../notes/04%20-%20MongoDB%20Data%20Structures.md); `labs` datasets restored
+**Prerequisites**: Python 3.x with PyMongo; [Notes 04 — MongoDB Data Structures](../notes/04%20-%20MongoDB%20Data%20Structures.md); `labs` datasets restored
 **Duration**: 2-3 hours
 **Points**: 50 points
 
 ### [Lab 3: MongoDB Aggregation Pipeline](lab03_aggregation_pipeline.md)
-**Focus**: Aggregation Framework (MongoDB)
+**Focus**: Aggregation Framework (MongoDB / PyMongo)
 - Build multi-stage pipelines with `$match`, `$group`, `$sort`, `$unwind`, and `$bucket`
 - Use accumulators (`$sum`, `$avg`, `$push`) to summarize grouped documents
 - Bucket continuous values into ranges for demographic analysis
 
 **Database / collections**: `labs` → `posts`, `inspections`, `companies`, `customers`
-**Prerequisites**: Lab 2; [Notes 05 — MongoDB Aggregation](../notes/05%20-%20MongoDB%20Aggregation.md)
+**Prerequisites**: Lab 2; Python 3.x with PyMongo; [Notes 05 — MongoDB Aggregation](../notes/05%20-%20MongoDB%20Aggregation.md)
 **Duration**: 3-4 hours
 **Points**: 50 points
 
@@ -59,7 +81,7 @@ The `sample` database is used only for scratch collections in the lecture notes 
 **Points**: 60 points
 
 ### [Lab 5: Deploying a Sharded MongoDB Cluster on Cloud VMs](lab05_mongodb_sharding.md)
-**Focus**: Horizontal Scaling and High Availability (MongoDB)
+**Focus**: Horizontal Scaling and High Availability (MongoDB / mongosh)
 - Deploy a 7-instance sharded and replicated cluster: config servers, shards, and mongos
 - Initiate replica sets and register shards with the query router
 - Shard a collection on a hashed key and verify chunk distribution
@@ -74,7 +96,8 @@ The `sample` database is used only for scratch collections in the lecture notes 
 - Each lab includes detailed instructions, sample data, and clear deliverables
 - Follow the grading criteria specified in each lab
 - Test your solutions thoroughly before submission
-- Use only the tools and technologies specified in each lab
+- Use only the tools and technologies specified in each lab — PyMongo for labs 1–3, boto3 for lab 4, `mongosh` for lab 5
+- Run your script and check its output before submitting; a query that prints nothing usually means the wrong database, not an empty result
 
 ## Getting Help
 

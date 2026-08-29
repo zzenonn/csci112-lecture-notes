@@ -1,11 +1,12 @@
 # Lab 1: Intro to NoSQL - From ERD to JSON
 
 ## Objective
-Convert relational database designs (ERD) into NoSQL document structures by transforming normalized data into **a single embedded MongoDB document per order**. All related entities (Customer, Order, OrderItem, Product) should be consolidated into one document
+Convert relational database designs (ERD) into NoSQL document structures by transforming normalized data into **a single embedded MongoDB document per order**. All related entities (Customer, Order, OrderItem, Product) should be consolidated into one document, then inserted with **PyMongo** from your host machine.
 
 ## Prerequisites
-- Access to MongoDB server with the `labs` database
-- Collection: `lab1` (you create it — MongoDB makes it on your first insert)
+- Python 3.x with PyMongo installed — see [PyMongo Setup](../notes/04%20-%20MongoDB%20Data%20Structures.md#pymongo-setup) in Notes 04
+- Access to a MongoDB server, reachable from your host machine on port 27017
+- **Database: `labs`    Collection: `lab1`** — you create the collection; MongoDB makes it on your first insert
 - Basic understanding of relational databases, ERDs, and primary/foreign key concepts
 
 ## JSON Review
@@ -34,6 +35,38 @@ JSON (JavaScript Object Notation) uses key-value pairs to store data:
   }
 }
 ```
+
+### Writing the Same Document in Python
+
+PyMongo does not take JSON text — it takes a **Python dictionary** and converts it to BSON for you.
+The shapes are identical; only the literals for booleans and null differ:
+
+| JSON | Python |
+|---|---|
+| `{ ... }` object | `{ ... }` dict |
+| `[ ... ]` array | `[ ... ]` list |
+| `"text"` | `"text"` |
+| `123`, `45.67` | `123`, `45.67` |
+| `true` / `false` | `True` / `False` |
+| `null` | `None` |
+
+The example above, as a Python dict:
+
+```python
+{
+    "name": "John Doe",
+    "age": 25,
+    "active": True,          # not true
+    "skills": ["coding", "design"],
+    "address": {
+        "street": "123 Main St",
+        "city": "Manila"
+    }
+}
+```
+
+Trailing commas are legal in Python and illegal in JSON. Single quotes are legal in Python too,
+but stick to double quotes so your documents read the same as the MongoDB documentation.
 
 ## ERD Description
 
@@ -127,18 +160,55 @@ Create a single MongoDB document per order with embedded data:
 
 ## Tasks
 
-### 1. Convert Orders to JSON Documents
-Transform each order below into the target embedded document structure.
+### 1. Convert Orders to Documents
+Transform each order below into the target embedded document structure, written as a Python dict.
 
-### 2. Insert Documents  
-Work in the **`labs`** database, collection **`lab1`**. Switch to it first, then insert one
-document per order:
+### 2. Insert the Documents
 
-```js
-use labs
+Work in **database `labs`, collection `lab1`**. Start your script with this preamble — it is the
+only place the database and collection are named, so everything after it is unambiguous:
+
+```python
+from pymongo import MongoClient
+
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
+
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
+
+# Database: labs    Collection: lab1
+lab1 = client["labs"]["lab1"]
 ```
 
-Use `db.lab1.insertOne({...})` for each document.
+Then insert one document per order with `lab1.insert_one({...})`.
+
+Because each order sets its own `_id` (from `OrderID`), re-running your script raises
+`DuplicateKeyError`. Clear the collection first so the script is safe to run repeatedly:
+
+```python
+# Only removes lab1 — the restored labs collections are untouched
+lab1.delete_many({})
+```
+
+### 3. Verify Your Inserts
+
+End your script with a check, so you can see what actually landed in the database:
+
+```python
+print("documents inserted:", lab1.count_documents({}))
+
+for doc in lab1.find().sort("_id", 1):
+    print(doc["_id"], doc["customer"]["firstName"], len(doc["items"]), "item(s)")
+```
+
+Expected output:
+
+```
+documents inserted: 4
+O1001 Mina 3 item(s)
+O1002 Paulo 1 item(s)
+O1003 Aisha 2 item(s)
+O1004 Luis 1 item(s)
+```
 
 ## Order Data to Convert
 
@@ -180,46 +250,89 @@ Items:
 ## Deliverables
 
 Submit **only**:
-- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-ERDtoJSON.js** (e.g. CSCI61-181234-Cruz-181223-Santos-ERDtoJSON.js - A JavaScript file containing the four `db.lab1.insertOne()` commands with your converted JSON documents
+- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-ERDtoJSON.py** (e.g. CSCI112-181234-Cruz-181223-Santos-ERDtoJSON.py) — a Python file containing the four `lab1.insert_one()` calls with your converted documents
 
 **File format example**:
-```javascript
-// Lab 1 Solution - ERD to JSON Conversion
-// Students: [Student1 Name], [Student2 Name]
+```python
+"""
+Certificate of Authorship:
+I have not discussed the Python language code in my program with anyone
+other than my instructor or the teaching assistants assigned to this course.
+I have not used Python language code obtained from another student,
+or any other unauthorized source, either modified or unmodified.
+If any Python language code or documentation used in my program
+was obtained from another source, such as a textbook or course notes,
+that has been clearly noted with a proper citation in the comments of my program.
+"""
 
-// Database: labs    Collection: lab1
-use labs
+# Lab 1 Solution - ERD to Document Conversion
+# Students: [Student1 Name], [Student2 Name]
 
-// Order 1
-db.lab1.insertOne({
-  // Your JSON document here
-});
+from pymongo import MongoClient
 
-// Order 2
-db.lab1.insertOne({
-  // Your JSON document here
-});
+VM_IP_ADDRESS = "<IP_ADDRESS>"   # replace with your VM's IP address
 
-// Order 3
-db.lab1.insertOne({
-  // Your JSON document here
-});
+client = MongoClient(f"mongodb://{VM_IP_ADDRESS}:27017/")
 
-// Order 4
-db.lab1.insertOne({
-  // Your JSON document here
-});
+# Database: labs    Collection: lab1
+lab1 = client["labs"]["lab1"]
+
+# Start clean so this script can be re-run
+lab1.delete_many({})
+
+# Order 1
+lab1.insert_one({
+    # Your document here
+})
+
+# Order 2
+lab1.insert_one({
+    # Your document here
+})
+
+# Order 3
+lab1.insert_one({
+    # Your document here
+})
+
+# Order 4
+lab1.insert_one({
+    # Your document here
+})
+
+# Verification
+print("documents inserted:", lab1.count_documents({}))
+for doc in lab1.find().sort("_id", 1):
+    print(doc["_id"], doc["customer"]["firstName"], len(doc["items"]), "item(s)")
 ```
 
 ## Grading
 
 **Total: 30 points**
 
-- JSON syntax correctness (10 points)
+- Document syntax correctness — valid Python dicts, correct types (10 points)
 - Document structure and embedding (10 points) 
-- Data accuracy and MongoDB operations (10 points)
+- Data accuracy and PyMongo operations (10 points)
 
 ## Notes
-- Use MongoDB shell only
-- Convert dates to ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)
-- Test JSON syntax before insertion (feel free to [lint](https://jsonlint.com/)
+- Use PyMongo from your host machine, not `mongosh`
+- Convert dates to ISO 8601 format (`"2025-08-10T14:05:00Z"`) as shown in the order data
+- Run your script and confirm the verification output before submitting
+
+### A Note on Date Types
+
+This lab stores dates as ISO 8601 **strings**, which keeps the documents readable and sortable.
+Production code usually stores a real BSON date instead — pass a `datetime` and PyMongo converts
+it for you:
+
+```python
+from datetime import datetime, timezone
+
+order = {
+    # Stored as a BSON date, not a string
+    "orderDate": datetime(2025, 8, 10, 14, 5, tzinfo=timezone.utc),
+    # ... the rest of your order fields
+}
+```
+
+You will use BSON dates in later modules. **For this lab, submit the strings.**
