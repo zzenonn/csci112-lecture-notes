@@ -22,7 +22,25 @@ labs = client["labs"]
 
 Lab 4 uses **boto3** against DynamoDB. Lab 5 is the exception: it stays in **`mongosh`**, because
 cluster administration (`rs.initiate()`, `sh.addShard()`, `sh.status()`) is shell work, not
-application work. Submitted deliverables are `.py` files for labs 1–4.
+application work.
+
+## Submission Format
+
+Labs 1–4 are submitted as **one `.zip` file per lab**, named exactly
+`CSCI112-[StudentID]-[LastName]-[LabName].zip` — the lab name is given in each lab's
+**Deliverables** section. The zip holds your Python source plus a `requirements.txt` generated with
+`pip freeze`:
+
+```
+CSCI112-181234-Cruz-MongoQueries.zip
+├── mongo_queries.py
+└── requirements.txt
+```
+
+**Do not zip your virtual environment or installed dependencies** — no `.venv/`, no
+`site-packages/`, no wheels. Graders build a fresh environment from your `requirements.txt`.
+
+Lab 5 has no file deliverable: it is an infrastructure diagram plus a live demonstration.
 
 ## Database Convention
 

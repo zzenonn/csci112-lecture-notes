@@ -144,10 +144,44 @@ def get_specific_order(table, customer_id, order_id):
 
 ## Deliverables
 
-Submit **only**:
-- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-DynamoDB.zip** The zip file must only contain the requirements.txt and an optional readme. **DO NOT include dependencies in the submission**
+Submit **only** one `.zip` file, named exactly:
 
-**File format example**:
+**CSCI112-[StudentID]-[LastName]-DynamoDB.zip** — e.g. `CSCI112-181234-Cruz-DynamoDB.zip`
+
+The zip must contain your Python source and a `requirements.txt`. An optional `readme` is welcome:
+
+```
+CSCI112-181234-Cruz-DynamoDB.zip
+├── dynamodb_lsi.py
+├── requirements.txt
+└── readme.md          (optional)
+```
+
+**Do not include a virtual environment or installed dependencies** — no `.venv/`, no
+`site-packages/`, no wheels. Graders build a fresh environment from your `requirements.txt`.
+
+Generate it from your activated virtual environment:
+
+```bash
+pip freeze > requirements.txt
+```
+
+For this lab `boto3` pulls in its own dependencies, so expect several lines (your versions may differ):
+
+```
+boto3==1.43.83
+botocore==1.43.83
+jmespath==1.1.0
+python-dateutil==2.9.0.post0
+s3transfer==0.19.2
+six==1.17.0
+urllib3==2.7.0
+```
+
+**Never put your AWS credentials in the zip.** They belong in `~/.aws/credentials`, and Learner
+Lab rotates them anyway.
+
+**Python file format example**:
 ```python
 """
 Certificate of Authorship:
@@ -161,7 +195,7 @@ that has been clearly noted with a proper citation in the comments of my program
 """
 
 # Lab 4 Solution - DynamoDB Table Design with LSIs
-# Students: [Student1 Name], [Student2 Name]
+# Student: [Your Name]
 
 import boto3
 from decimal import Decimal

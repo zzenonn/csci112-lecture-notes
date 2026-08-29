@@ -183,10 +183,35 @@ print("fines cleared:", result.modified_count)
 
 ## Deliverables
 
-Submit **only**:
-- **CSCI112-[StudentID1]-[LastName1]-[StudentID2]-[LastName2]-MongoQueries.py**
+Submit **only** one `.zip` file, named exactly:
 
-**File format example**:
+**CSCI112-[StudentID]-[LastName]-MongoQueries.zip** — e.g. `CSCI112-181234-Cruz-MongoQueries.zip`
+
+The zip must contain your Python source and a `requirements.txt`:
+
+```
+CSCI112-181234-Cruz-MongoQueries.zip
+├── mongo_queries.py
+└── requirements.txt
+```
+
+**Do not include a virtual environment or installed dependencies** — no `.venv/`, no
+`site-packages/`, no wheels. Graders build a fresh environment from your `requirements.txt`.
+
+Generate it from your activated virtual environment:
+
+```bash
+pip freeze > requirements.txt
+```
+
+For this lab that is two lines (your versions may differ):
+
+```
+dnspython==2.8.0
+pymongo==4.17.0
+```
+
+**Python file format example**:
 ```python
 """
 Certificate of Authorship:
@@ -200,7 +225,7 @@ that has been clearly noted with a proper citation in the comments of my program
 """
 
 # Lab 2 Solution - MongoDB Query Operations
-# Students: [Student1 Name], [Student2 Name]
+# Student: [Your Name]
 
 from pymongo import MongoClient
 
