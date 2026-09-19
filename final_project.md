@@ -14,8 +14,8 @@ for it. You will:
    operations, along with the queries your use case needs.
 5. Present all of the above to the class.
 
-The project uses three criteria, each scored **0–4**. Quality of the data model has
-double weight, for a total of **16 points**. See [Grading](#grading).
+The project uses four criteria, each scored **0–4**, for a total of **16 points**.
+See [Grading](#grading).
 
 ---
 
@@ -29,7 +29,6 @@ double weight, for a total of **16 points**. See [Grading](#grading).
 - [The Demo](#the-demo)
 - [Presentation Format](#presentation-format)
 - [Grading](#grading)
-- [Timeline](#timeline)
 - [Tips](#tips)
 - [Academic Honesty and GenAI](#academic-honesty-and-genai)
 
@@ -204,9 +203,6 @@ questions about the model.
 | **Quality of demo** | Demonstrates the working use-case model, all four CRUD operations, and the main application queries; verifies results and state changes against the model. | Demonstrates the working use-case model and its main queries, but CRUD coverage or verification of state changes is incomplete. | Shows CRUD in the proposed use-case model, but application queries are unimplemented, fail, or have unverifiable results. | Shows CRUD on isolated records; no use-case data model is demonstrated. | No working database operation or observable query result is demonstrated. |
 | **Understanding of the database technology** | Accurately explains data organization, read/write mechanisms, and required production behavior; connects distinguishing capabilities, limitations, and architectural trade-offs to their consequences for applications. | Correctly explains data organization, read/write mechanisms, main capabilities, and required production behavior, but leaves their application consequences or limits unexplained. | Describes capabilities and operations, but leaves a core mechanism unexplained or makes an error about storage, query processing, or distributed behavior. | Identifies the database and names features or terminology without explaining what they do or how the database works. | No assessable explanation of the database technology. |
 | **Quality of presentation** | Organizes the technology, model, and demo into a sequence classmates can follow. Defines unfamiliar terms, makes visuals and results legible, and explains what to notice before moving on. | The main explanation and demonstration can be followed and central visuals are legible, but supporting terms, transitions, or results are left unexplained. | The main sections are identifiable, but missing connections, unreadable evidence, or rushed steps obscure a central part of the explanation or demo. | Presents slides, code, or outputs as fragments without enough context or guidance for the audience to follow the main idea or demonstration. | No assessable presentation. |
-
-
-_(Fill in the dates for this term.)_
 
 ---
 
