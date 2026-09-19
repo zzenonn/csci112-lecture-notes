@@ -5,7 +5,7 @@
 In a group, pick a NoSQL database and a real use case, then design the data model
 for it. You will:
 
-1. Submit a short **proposal** (see [Proposal — Submit This First](#proposal--submit-this-first)).
+1. Submit a short **proposal** (see [Proposal (Submit This First!)](#proposal--submit-this-first)).
 2. Explain **how the database works**: its data organization, query mechanisms,
    capabilities, limitations, and production behavior.
 3. Run a **data modeling session**: state your access patterns, draw an ERD, design
@@ -64,11 +64,11 @@ requires:
 
 ---
 
-## Proposal — Submit This First
+## Proposal (Submit This First!)
 
 Post this to the **Project Proposal** discussion on Canvas. One or
 two paragraphs plus the bullets below. This is a checkpoint so I can steer you
-before you invest in a model, not a graded essay.
+before you spend too much time on the option.
 
 1. **Group number and members.**
 2. **Database** and its family from the table above.
