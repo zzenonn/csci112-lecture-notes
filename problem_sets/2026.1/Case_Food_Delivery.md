@@ -37,8 +37,9 @@ the menu within 1 minute.
 When a customer checks out, the order records what they bought, the price of
 each item at that moment, the delivery fee, the total, and the address the food
 goes to. Payment is by card, GCash, or cash on delivery. The order then moves through
-placed, accepted, preparing, picked up, and delivered (or cancelled), and the
-customer, restaurant, and rider all watch it change.
+placed, accepted, preparing, picked up, and delivered (or cancelled). Live order
+tracking for customers, restaurants, and riders runs on a separate system and is
+out of scope for this case.
 
 After delivery, the customer may rate the restaurant from 1 to 5 stars and leave
 a short comment. About 30% of delivered orders get a review.

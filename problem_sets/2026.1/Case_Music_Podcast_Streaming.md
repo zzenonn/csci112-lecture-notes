@@ -21,8 +21,8 @@ Songs and podcast episodes share basic details: a title, one or more creators,
 a duration, artwork, a language, and a genre or category. They also differ. A
 song belongs to an album, has a track number, and may list featured artists and
 songwriters. An episode belongs to a show, has a season and an episode number,
-has a description, and may have a transcript. In the app, listeners search,
-browse, save, and build playlists with songs and episodes mixed together.
+has a description, and may have a transcript. In the app, listeners search and
+browse songs and episodes mixed together.
 
 Each time a listener starts a song or an episode, the app reports a play. A play
 is **qualified** if the listener stays for at least 30 seconds of a song or 60
@@ -129,7 +129,7 @@ video plays and audio plays separately for video episodes.
 None of the 1.2 million existing episodes has any video information, and no
 existing play records whether it was watched or heard. These episodes, and the
 new audio episodes that continue to arrive, do not change. Video episodes must
-appear in search, browse, playlists, charts, and dashboards alongside everything
+appear in search, browse, charts, and dashboards alongside everything
 else. Tugtog cannot take the service offline for the change. Older app versions that do not know about
 video must keep working and play these episodes as audio.
 

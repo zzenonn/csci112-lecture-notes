@@ -164,8 +164,8 @@ Write Python code using PyMongo that demonstrates the following.
 
 4. **Access pattern queries.** Run the queries for your top-ranked access patterns
    (at least AP1, AP2, AP3, and AP5, plus any others you ranked above them). For
-   writes, show the state before and after. Include `explain()` output showing
-   that each query uses the index you designed for it.
+   writes, show the state before and after. Include `explain()` output or the
+   indexes each query uses.
 
 In section 2 of your design paper, also explain how player and match data would
 be divided across multiple servers as Bakunawa grows: what decides which server a
