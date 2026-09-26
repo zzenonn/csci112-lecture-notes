@@ -9,11 +9,11 @@
 ### Table of Contents
 
 #### MongoDB Data Modeling Patterns
-- [Problem Set: Fitness Equipment Rental](2025-2026/Problem_Set_Fitness_Equipment_Rental.md)
-- [Problem Set: Hospital Patient Management](2025-2026/Problem_Set_Hospital_Patient_Management.md)
-- [Problem Set: Social Media Analytics](2025-2026/Problem_Set_Social_Media_Analytics.md) 
-- [Problem Set: University Course Management](2025-2026/Problem_Set_University_Course_Management.md)
-- [Problem Set: Vehicle Management System](2025-2026/Problem_Set_Vehicle_Management_System.md)
+- [Problem Set: Fitness Equipment Rental](Problem_Set_Fitness_Equipment_Rental.md)
+- [Problem Set: Hospital Patient Management](Problem_Set_Hospital_Patient_Management.md)
+- [Problem Set: Social Media Analytics](Problem_Set_Social_Media_Analytics.md) 
+- [Problem Set: University Course Management](Problem_Set_University_Course_Management.md)
+- [Problem Set: Vehicle Management System](Problem_Set_Vehicle_Management_System.md)
 
 ---
 
